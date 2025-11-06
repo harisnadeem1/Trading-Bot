@@ -1,0 +1,34 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-black text-white;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+@layer utilities {
+  .glow-green {
+    text-shadow: 0 0 20px rgba(34, 197, 94, 0.5);
+  }
+  
+  .glow-green-strong {
+    text-shadow: 0 0 30px rgba(34, 197, 94, 0.8), 0 0 60px rgba(34, 197, 94, 0.4);
+  }
+  
+  .border-glow {
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+  }
+  
+  .card-glow {
+    box-shadow: 0 4px 30px rgba(34, 197, 94, 0.1);
+  }
+
+  .glow-blue {
+    text-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+  }
+  .card-glow-blue {
+    box-shadow: 0 4px 30px rgba(59, 130, 246, 0.1);
+  }
+}
