@@ -52,7 +52,6 @@ const Header = () => {
     }
   };
 
-
   return (
     <div className="fixed top-0 left-0 right-0 z-40 flex justify-center pt-4 px-2 sm:px-4">
       <motion.header
@@ -128,7 +127,7 @@ const Header = () => {
               <span className="text-base font-bold text-white sm:hidden">Nova</span>
             </Link>
 
-            {/* Divider - Desktop Only - More Visible */}
+            {/* Divider - Desktop Only */}
             <div className="hidden lg:block h-10 w-[2px] bg-gradient-to-b from-transparent via-gray-400 to-transparent mx-6 opacity-60" />
 
             {/* Desktop Navigation */}
@@ -145,7 +144,7 @@ const Header = () => {
               ))}
             </nav>
 
-            {/* Right Side - Desktop - Larger Button */}
+            {/* Right Side - Desktop */}
             <div className="hidden md:flex items-center gap-3 flex-shrink-0 ml-6">
               {isAuthenticated ? (
                 <Link to="/dashboard">
@@ -163,18 +162,14 @@ const Header = () => {
               )}
             </div>
 
-            {/* Mobile Right Side */}
-            <div className="md:hidden flex items-center gap-2 sm:gap-3">
-              {!isAuthenticated && (
-                <Button 
-                  onClick={() => openAuthModal('login')} 
-                  variant="ghost" 
-                  size="icon" 
-                  className="text-white hover:bg-white/10 rounded-full h-9 w-9"
-                >
-                  <LogIn size={20} />
-                </Button>
-              )}
+            {/* Mobile Right Side - Signup + Menu */}
+            <div className="md:hidden flex items-center gap-2">
+              <Button 
+                onClick={() => openAuthModal('signup')} 
+                className="bg-[#80ee64] hover:bg-[#70de54] text-black font-semibold rounded-full px-4 h-9 text-sm shadow-lg shadow-[#80ee64]/20 transition-all duration-300"
+              >
+                Sign Up
+              </Button>
               <button 
                 onClick={() => setIsOpen(!isOpen)} 
                 className="text-white hover:bg-white/10 p-2 rounded-full transition-colors"
@@ -186,46 +181,57 @@ const Header = () => {
         </div>
       </motion.header>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu - Improved Design */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.95 }}
-            transition={{ duration: 0.2 }}
-            className="md:hidden absolute top-20 sm:top-22 left-2 right-2 sm:left-4 sm:right-4 bg-[#212525]/98 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/10 overflow-hidden"
-          >
-            <nav className="flex flex-col p-4">
-              {navLinks.map((link, index) => (
-                <Link
-                  key={link.name}
-                  to={link.href}
-                  onClick={(e) => scrollToSection(e, link.href)}
-                  className="text-white hover:bg-white/5 text-[15px] py-3 px-4 rounded-xl transition-all duration-300"
-                >
-                  {link.name}
-                </Link>
-              ))}
-              
-              <div className="h-px bg-gradient-to-r from-transparent via-gray-600 to-transparent my-2 opacity-60" />
-              
-              {isAuthenticated ? (
-                <Link to="/dashboard" onClick={() => setIsOpen(false)}>
-                  <Button className="w-full bg-[#80ee64] hover:bg-[#70de54] text-black font-semibold rounded-xl h-12 text-[15px] shadow-lg shadow-[#80ee64]/20 transition-all duration-300 mt-2">
-                    Sign Up
-                  </Button>
-                </Link>
-              ) : (
-                <Button 
-                  onClick={() => { openAuthModal('signup'); setIsOpen(false); }} 
-                  className="w-full bg-[#80ee64] hover:bg-[#70de54] text-black font-semibold rounded-xl h-12 text-[15px] shadow-lg shadow-[#80ee64]/20 transition-all duration-300 mt-2"
-                >
-                  Sign Up
-                </Button>
-              )}
-            </nav>
-          </motion.div>
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm"
+              onClick={() => setIsOpen(false)}
+            />
+            
+            {/* Menu Panel */}
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className="md:hidden absolute top-20 sm:top-22 left-2 right-2 sm:left-4 sm:right-4 bg-[#212525] rounded-2xl shadow-2xl border border-gray-800 overflow-hidden"
+            >
+              <nav className="flex flex-col p-2">
+                {navLinks.map((link, index) => (
+                  <Link
+                    key={link.name}
+                    to={link.href}
+                    onClick={(e) => scrollToSection(e, link.href)}
+                    className="text-white hover:bg-white/10 text-[15px] py-3.5 px-4 rounded-xl transition-all duration-200"
+                  >
+                    {link.name}
+                  </Link>
+                ))}
+                
+                {/* Only show login option if not authenticated */}
+                {!isAuthenticated && (
+                  <>
+                    <div className="h-px bg-gray-800 my-2 mx-2" />
+                    
+                    <button
+                      onClick={() => { openAuthModal('login'); setIsOpen(false); }}
+                      className="text-white hover:bg-white/10 text-[15px] py-3.5 px-4 rounded-xl transition-all duration-200 text-left flex items-center gap-2"
+                    >
+                      <LogIn size={18} />
+                      Login
+                    </button>
+                  </>
+                )}
+              </nav>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </div>

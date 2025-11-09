@@ -1,74 +1,128 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import { CheckCircle2, Radar, Layers, BarChart3 } from 'lucide-react';
-
-const benefits = [
-  {
-    title: 'Backtested Strategy',
-    description: 'Our algorithms are rigorously tested against historical data to ensure consistent performance',
-    icon: CheckCircle2,
-  },
-  {
-    title: 'Early Trend Detection',
-    description: 'AI identifies market trends before they become obvious, giving you a competitive edge',
-    icon: Radar,
-  },
-  {
-    title: 'Adaptable Trading',
-    description: 'Machine learning continuously adapts to changing market conditions in real-time',
-    icon: Layers,
-  },
-  {
-    title: 'Diversified Strategies',
-    description: 'Multiple trading strategies work simultaneously to maximize returns and minimize risk',
-    icon: BarChart3,
-  },
-];
+import { Check, Lightbulb } from 'lucide-react';
 
 const Benefits = () => {
-  return (
-    <section className="py-20 px-4 bg-gradient-to-b from-black to-green-950/10">
-      <div className="container mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
-        >
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            Why Choose <span className="text-green-400 glow-green">NovaTrade AI</span>
-          </h2>
-          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            Advanced AI technology meets proven trading strategies for unmatched performance
-          </p>
-        </motion.div>
+  const benefits = [
+    {
+      title: 'Profitable Backtested Strategy',
+      description: 'Rigorously validate over 10+ years of price history across various currencies, ensuring a proven and reliable approach.',
+    },
+    {
+      title: 'Early Trend Detection',
+      description: 'Initiate breakouts swiftly as momentum accelerates, positioning traders to capitalize on emerging trends',
+    },
+    {
+      title: 'Adaptable Trading',
+      description: 'Dynamic algorithms react promptly to changing market conditions, providing adaptability in the face of evolving trends.',
+    },
+    {
+      title: 'Diversified Strategies',
+      description: 'Breakout approach diversifies volatility risk across EURUSD pairs, optimizing portfolio resilience.',
+    },
+    {
+      title: 'Risk Calibration',
+      description: 'Tight control over position sizing, momentum, and stops, empowering traders to manage risk efficiently.',
+    },
+    {
+      title: 'Hands-Free Automation',
+      description: 'We automate so much, it feels like cheating. But hey, why not make life easier?',
+    },
+    {
+      title: 'Round-the-clock Operation',
+      description: 'Markets dont sleep, and neither do we. Every opportunity is ours before you even wake up.',
+    },
+  ];
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {benefits.map((benefit, index) => {
-            const Icon = benefit.icon;
-            return (
-              <motion.div
-                key={benefit.title}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="bg-gradient-to-br from-gray-900 to-green-950/20 border border-green-500/20 rounded-xl p-6 hover:border-green-500/40 transition-all duration-300 card-glow group"
-              >
-                <div className="mb-4">
-                  <div className="inline-flex p-3 bg-green-500/10 rounded-lg group-hover:bg-green-500/20 transition-all duration-300">
-                    <Icon className="w-8 h-8 text-green-400" />
+  return (
+     <div className="relative min-h-screen bg-black text-white py-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      {/* ✅ Elliptical Glow Background Image */}
+      <div
+        className="
+          absolute 
+          inset-0 
+          flex 
+          items-start sm:items-center 
+          justify-center 
+          mt-[-270px] sm:mt-0
+        "
+        aria-hidden="true"
+      >
+        {/* First ellipse */}
+        <img
+          src="/home/hero/Green_Ellipse.svg"
+          alt=""
+          className="w-[900px] h-[900px] sm:w-full sm:h-full opacity-40 blur-3xl object-contain pointer-events-none select-none"
+        />
+        {/* Second ellipse (stronger layer) */}
+        <img
+          src="/home/hero/Green_Ellipse.svg"
+          alt=""
+          className="absolute w-[850px] h-[850px] sm:w-[90%] sm:h-[90%] opacity-50 blur-2xl object-contain pointer-events-none select-none"
+        />
+      </div>
+
+      <div className="relative max-w-7xl mx-auto z-10">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+          {/* Benefits Section - Scrollable */}
+          <div className="lg:pr-8">
+            <h2 className="text-4xl sm:text-4xl lg:text-4xl font-light mb-6 lg:mb-8 text-[#80ee64]">
+              Benefits
+            </h2>
+            <p className="text-[#ddffdc99] text-sm sm:text-base mb-8 lg:mb-8 leading-relaxed">
+              We've mastered the game. If you're still asking why, you're not ready. Frequencee doesn't sell promises—we deliver results while others are still talking
+            </p>
+
+            <div className="space-y-6 lg:space-y-4">
+              {benefits.map((benefit, index) => (
+                <div key={index} className="border-b border-gray-800 pb-6 lg:pb-4">
+                  <div className="flex items-start gap-3 mb-3">
+                    <Check className="w-5 h-5 sm:w-6 sm:h-5 text-[#80ee64] flex-shrink-0 mt-1" />
+                    <h3 className="text-xl sm:text-xl lg:text-xl font-light text-white">
+                      {benefit.title}
+                    </h3>
                   </div>
+                  <p className="text-[#ddffdc99] text-sm sm:text-base leading-relaxed ml-8 sm:ml-9">
+
+                    {benefit.description}
+                  </p>
                 </div>
-                <h3 className="text-xl font-bold mb-3">{benefit.title}</h3>
-                <p className="text-gray-400 text-sm leading-relaxed">{benefit.description}</p>
-              </motion.div>
-            );
-          })}
+              ))}
+            </div>
+          </div>
+
+          {/* Challenges Section - Sticky on Desktop */}
+          <div className="lg:sticky lg:top-8 lg:self-start">
+            <h2 className="text-3xl sm:text-4xl lg:text-4xl font-light mb-1 lg:mb-1">
+              Challenges?
+            </h2>
+            <h3 className="text-3xl sm:text-4xl lg:text-4xl font-light mb-2 lg:mb-2 text-[#80ee64]">
+              We Don't Have Any
+            </h3>
+            <p className="text-[#ddffdc99] text-sm sm:text-base mb-4 lg:mb-4 leading-relaxed">
+              Our only 'challenge'? Helping you keep up with the wins. Well, there's one more... but scared money makes no money
+            </p>
+
+            <div className="rounded-2xl p-6 sm:p-8 lg:p-6 bg-[#212525]">
+
+              <div className="inline-flex items-center justify-center mb-6">
+                <Lightbulb className="w-6 h-6 sm:w-7 sm:h-7 text-[#80ee64]" />
+              </div>
+              
+              <h4 className="text-2xl sm:text-2xl font-light mb-0 text-white">
+                Drawdowns
+              </h4>
+              <h5 className="text-xl sm:text-2xl font-light mb-4 sm:mb-2 text-[#80ee64]">
+                The Price of Playing to Win
+              </h5>
+              
+              <p className="text-[#ddffdc99] text-sm sm:text-base leading-relaxed">
+                Losing streaks happen, but they're the cost of bold strategies that yield bigger returns. With Frequencee, even the losses are calculated risks
+              </p>
+            </div>
+          </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 };
 

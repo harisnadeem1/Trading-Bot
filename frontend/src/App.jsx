@@ -23,10 +23,12 @@ import AdminDashboard from '@/pages/admin/AdminDashboard';
 import AdminUsers from '@/pages/admin/AdminUsers';
 import AdminTransactions from '@/pages/admin/AdminTransactions';
 import AdminPlans from '@/pages/admin/AdminPlans';
+import ScrollToTop from '@/components/routes/ScrollToTop'; 
 
 function App() {
   return (
     <Router>
+       <ScrollToTop />
       <AuthModal />
       <Routes>
         {/* Public Routes */}
