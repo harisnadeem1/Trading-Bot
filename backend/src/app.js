@@ -4,7 +4,14 @@ import cors from "cors";
 import dotenv from "dotenv";
 import userRoutes from "./routes/userRoutes.js";
 import referralRoutes from "./routes/referralRoutes.js";
-
+import dashboardRoutes from "./routes/dashboardRoutes.js";
+import planRoutes from "./routes/planRoutes.js";
+import adminPlansRoutes from "./routes/adminPlansRoutes.js";
+import investmentRoutes from "./routes/investmentRoutes.js";
+import { startDailyJobs } from "./cron/dailyJobs.js";
+import withdrawalRoutes from "./routes/withdrawalRoutes.js";
+import adminTransactionRoutes from "./routes/adminTransactionRoutes.js";
+import affiliateRoutes from "./routes/affiliateRoutes.js";
 dotenv.config();
 
 const app = express();
@@ -14,12 +21,23 @@ app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 app.use(express.json());
 
 
+startDailyJobs();
+
 
 // Routes
 app.use("/api/users", userRoutes);
 app.use("/api/referral", referralRoutes);
+app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/plans", planRoutes);
+
+app.use("/api/invest", investmentRoutes);
+app.use("/api/withdraw", withdrawalRoutes);
+app.use("/api/affiliate", affiliateRoutes);
 
 
 
+
+app.use("/api/admin/plans", adminPlansRoutes);
+app.use("/api/admin/transactions", adminTransactionRoutes);
 
 export default app;

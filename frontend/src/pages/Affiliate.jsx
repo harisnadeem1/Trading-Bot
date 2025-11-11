@@ -7,50 +7,50 @@ import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-const mockReferrals = [
-  { 
-    id: 1,
-    email: 'newuser1@example.com', 
-    joinDate: '2025-11-01',
-    time: '14:30 PM',
-    totalDeposited: 1500, 
-    commission: 150,
-    status: 'active'
-  },
-  { 
-    id: 2,
-    email: 'investor22@example.com', 
-    joinDate: '2025-10-25',
-    time: '09:15 AM',
-    totalDeposited: 500, 
-    commission: 50,
-    status: 'active'
-  },
-  { 
-    id: 3,
-    email: 'tradergal@example.com', 
-    joinDate: '2025-10-18',
-    time: '16:45 PM',
-    totalDeposited: 3600, 
-    commission: 360.25,
-    status: 'active'
-  },
-  { 
-    id: 4,
-    email: 'crypto_kid@example.com', 
-    joinDate: '2025-09-30',
-    time: '11:20 AM',
-    totalDeposited: 0, 
-    commission: 0,
-    status: 'pending'
-  },
-];
+
 
 const Affiliate = () => {
   const { token } = useAuthStore();
   const [referralLink, setReferralLink] = useState('');
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [tiers, setTiers] = useState([]);
+  const [stats, setStats] = useState({
+  totalReferrals: 0,
+  totalEarnings: 0,
+  activeReferrals: 0,
+  referrals: [],
+});
+
+  useEffect(() => {
+  const fetchTiers = async () => {
+    try {
+      const res = await axios.get(`${API_BASE_URL}/affiliate/tiers`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setTiers(res.data.data);
+    } catch (err) {
+      console.error("Error fetching tiers:", err);
+    }
+  };
+  if (token) fetchTiers();
+}, [token]);
+  useEffect(() => {
+  const fetchAffiliateStats = async () => {
+    if (!token) return;
+    try {
+      const res = await axios.get(`${API_BASE_URL}/affiliate/dashboard`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setStats(res.data.data);
+    } catch (err) {
+      console.error("Error fetching affiliate dashboard:", err);
+    }
+  };
+
+  fetchAffiliateStats();
+}, [token]);
+
 
   useEffect(() => {
     const fetchReferralLink = async () => {
@@ -99,14 +99,15 @@ const Affiliate = () => {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="bg-[#0F1014] border border-white/5 rounded-xl p-5 hover:border-white/10 transition-all"
           >
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-[#80ee64]/10 rounded-xl flex items-center justify-center">
-                <Users className="w-5 h-5 text-[#80ee64]" />
-              </div>
+            <div className="flex justify-between items-center gap-3 mb-3">
               <h3 className="text-sm text-gray-400 font-medium">Total Referrals</h3>
+              <div className=" flex items-center justify-center">
+                <Users className="w-6 h-6 text-[#80ee64]" />
+              </div>
+              
             </div>
-            <p className="text-2xl font-bold text-white">42</p>
-            <p className="text-xs text-gray-500 mt-1">Active users</p>
+            <p className="text-2xl font-bold text-white">{stats.totalReferrals}</p>
+            <p className="text-xs text-gray-500 mt-1">Total sign-ups</p>
           </motion.div>
 
           <motion.div
@@ -115,13 +116,14 @@ const Affiliate = () => {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="bg-[#0F1014] border border-white/5 rounded-xl p-5 hover:border-white/10 transition-all"
           >
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-[#80ee64]/10 rounded-xl flex items-center justify-center">
-                <DollarSign className="w-5 h-5 text-[#80ee64]" />
+            <div className="flex justify-between items-center gap-3 mb-3">
+             <h3 className="text-sm text-gray-400 font-medium">Total Earned</h3>
+
+              <div className=" flex items-center justify-center">
+                <DollarSign className="w-6 h-6 text-[#80ee64]" />
               </div>
-              <h3 className="text-sm text-gray-400 font-medium">Total Earned</h3>
             </div>
-            <p className="text-2xl font-bold text-white">$560.25</p>
+            <p className="text-2xl font-bold text-white"> ${Number(stats.totalEarnings).toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
             <p className="text-xs text-gray-500 mt-1">Lifetime earnings</p>
           </motion.div>
 
@@ -131,14 +133,15 @@ const Affiliate = () => {
             transition={{ duration: 0.5, delay: 0.3 }}
             className="bg-[#0F1014] border border-white/5 rounded-xl p-5 hover:border-white/10 transition-all"
           >
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-[#80ee64]/10 rounded-xl flex items-center justify-center">
-                <TrendingUp className="w-5 h-5 text-[#80ee64]" />
+            <div className="flex justify-between items-center gap-3 mb-3">
+              <h3 className="text-sm text-gray-400 font-medium">Active Referrals</h3>
+
+              <div className=" flex items-center justify-center">
+                <TrendingUp className="w-6 h-6 text-[#80ee64]" />
               </div>
-              <h3 className="text-sm text-gray-400 font-medium">Pending Payout</h3>
             </div>
-            <p className="text-2xl font-bold text-white">$120.00</p>
-            <p className="text-xs text-gray-500 mt-1">Available soon</p>
+            <p className="text-2xl font-bold text-white">{stats.activeReferrals}</p>
+            <p className="text-xs text-gray-500 mt-1">Referrals currently earning commissions</p>
           </motion.div>
         </div>
 
@@ -164,24 +167,29 @@ const Affiliate = () => {
             <div className="grid grid-cols-2 gap-3 mb-6">
               <div className="bg-[#80ee64]/5 border border-[#80ee64]/20 rounded-xl p-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="w-6 h-6 bg-[#80ee64]/20 rounded-full flex items-center justify-center">
-                    <span className="text-xs font-bold text-[#80ee64]">1</span>
-                  </div>
+                  
                   <span className="text-xs text-gray-400">Level 1 Referrals</span>
                 </div>
-                <p className="text-2xl font-bold text-[#80ee64]">10%</p>
+
+                <div className="flex items-center gap-2 mb-0">
+                  
+                 <p className="text-2xl font-bold text-[#80ee64]">10%</p>
                 <p className="text-xs text-gray-500 mt-1">Direct referrals</p>
+                </div>
+                
               </div>
 
               <div className="bg-[#80ee64]/5 border border-[#80ee64]/20 rounded-xl p-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="w-6 h-6 bg-[#80ee64]/20 rounded-full flex items-center justify-center">
-                    <span className="text-xs font-bold text-[#80ee64]">2</span>
-                  </div>
+                  
                   <span className="text-xs text-gray-400">Level 2 Referrals</span>
                 </div>
-                <p className="text-2xl font-bold text-[#80ee64]">5%</p>
+                <div className="flex items-center gap-2 mb-0">
+                  
+                    <p className="text-2xl font-bold text-[#80ee64]">5%</p>
                 <p className="text-xs text-gray-500 mt-1">Sub-referrals</p>
+                </div>
+             
               </div>
             </div>
 
@@ -289,83 +297,91 @@ const Affiliate = () => {
 
         {/* Reward System */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.6 }}
-          className="bg-[#0F1014] border border-white/5 rounded-2xl p-6"
-        >
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-[#80ee64]/10 rounded-xl flex items-center justify-center">
-              <Gift className="w-5 h-5 text-[#80ee64]" />
-            </div>
-            <div>
-              <h2 className="text-xl font-bold text-white">Reward System</h2>
-              <p className="text-sm text-gray-400">Unlock higher commissions as you grow</p>
-            </div>
-          </div>
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.5, delay: 0.6 }}
+  className="bg-[#0F1014] border border-white/5 rounded-2xl p-6"
+>
+  <div className="flex items-center gap-3 mb-6">
+    <div className="w-10 h-10 bg-[#80ee64]/10 rounded-xl flex items-center justify-center">
+      <Gift className="w-5 h-5 text-[#80ee64]" />
+    </div>
+    <div>
+      <h2 className="text-xl font-bold text-white">Reward System</h2>
+      <p className="text-sm text-gray-400">
+        Unlock higher commissions as you grow
+      </p>
+    </div>
+  </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-[#181A20] border border-white/5 rounded-xl p-5">
-              <div className="flex items-center justify-between mb-3">
-                <div className="w-10 h-10 bg-[#80ee64]/10 rounded-lg flex items-center justify-center">
-                  <Target className="w-5 h-5 text-[#80ee64]" />
-                </div>
-                <span className="text-xs font-medium text-gray-400">BRONZE</span>
-              </div>
-              <p className="text-lg font-bold text-white mb-2">10% Commission</p>
-              <p className="text-xs text-gray-400 mb-3">0-10 referrals</p>
-              <div className="flex items-center gap-2 text-xs text-gray-500">
-                <Check className="w-3 h-3 text-[#80ee64]" />
-                <span>Level 1: 10%</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs text-gray-500">
-                <Check className="w-3 h-3 text-[#80ee64]" />
-                <span>Level 2: 5%</span>
-              </div>
-            </div>
+  {tiers.length === 0 ? (
+    <p className="text-gray-400 text-sm">Loading tiers...</p>
+  ) : (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {tiers.map((tier, index) => {
+        // Dynamic icon rotation for each tier
+        const icons = [Target, Zap, TrendingUp];
+        const Icon = icons[index % icons.length];
 
-            <div className="bg-[#181A20] border border-[#80ee64]/20 rounded-xl p-5 relative overflow-hidden">
+        // Format referrals range text
+        const referralRange =
+          tier.max_referrals !== null
+            ? `${tier.min_referrals}-${tier.max_referrals} referrals`
+            : `${tier.min_referrals}+ referrals`;
+
+        return (
+          <div
+            key={tier.id}
+            className={`bg-[#181A20] rounded-xl p-5 border ${
+              index === 1
+                ? 'border-[#80ee64]/20 relative overflow-hidden'
+                : 'border-white/5'
+            } ${index > 1 ? 'opacity-80' : ''}`}
+          >
+            {index === 1 && (
               <div className="absolute top-2 right-2">
-                <span className="text-[10px] font-bold text-[#80ee64] bg-[#80ee64]/10 px-2 py-1 rounded-full">ACTIVE</span>
+                <span className="text-[10px] font-bold text-[#80ee64] bg-[#80ee64]/10 px-2 py-1 rounded-full">
+                  ACTIVE
+                </span>
               </div>
-              <div className="flex items-center justify-between mb-3">
-                <div className="w-10 h-10 bg-[#80ee64]/10 rounded-lg flex items-center justify-center">
-                  <Zap className="w-5 h-5 text-[#80ee64]" />
-                </div>
-                <span className="text-xs font-medium text-gray-400">SILVER</span>
+            )}
+
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 bg-[#80ee64]/10 rounded-lg flex items-center justify-center">
+                <Icon className="w-5 h-5 text-[#80ee64]" />
               </div>
-              <p className="text-lg font-bold text-white mb-2">12% Commission</p>
-              <p className="text-xs text-gray-400 mb-3">11-50 referrals</p>
-              <div className="flex items-center gap-2 text-xs text-gray-500">
-                <Check className="w-3 h-3 text-[#80ee64]" />
-                <span>Level 1: 12%</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs text-gray-500">
-                <Check className="w-3 h-3 text-[#80ee64]" />
-                <span>Level 2: 6%</span>
-              </div>
+              <span className="text-xs font-medium text-gray-400 uppercase">
+                {tier.tier_name}
+              </span>
             </div>
 
-            <div className="bg-[#181A20] border border-white/5 rounded-xl p-5 opacity-60">
-              <div className="flex items-center justify-between mb-3">
-                <div className="w-10 h-10 bg-[#80ee64]/10 rounded-lg flex items-center justify-center">
-                  <TrendingUp className="w-5 h-5 text-[#80ee64]" />
-                </div>
-                <span className="text-xs font-medium text-gray-400">GOLD</span>
-              </div>
-              <p className="text-lg font-bold text-white mb-2">15% Commission</p>
-              <p className="text-xs text-gray-400 mb-3">51+ referrals</p>
-              <div className="flex items-center gap-2 text-xs text-gray-500">
-                <Check className="w-3 h-3 text-[#80ee64]" />
-                <span>Level 1: 15%</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs text-gray-500">
-                <Check className="w-3 h-3 text-[#80ee64]" />
-                <span>Level 2: 7.5%</span>
-              </div>
+            <p className="text-lg font-bold text-white mb-2">
+              {Number(tier.commission_percent).toFixed(1)}% Commission
+            </p>
+
+            <p className="text-xs text-gray-400 mb-3">{referralRange}</p>
+
+            <div className="flex items-center gap-2 text-xs text-gray-500">
+              <Check className="w-3 h-3 text-[#80ee64]" />
+              <span>
+                Level 1: {Number(tier.commission_percent).toFixed(1)}%
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2 text-xs text-gray-500">
+              <Check className="w-3 h-3 text-[#80ee64]" />
+              <span>
+                Level 2:{' '}
+                {(Number(tier.commission_percent) / 2).toFixed(1)}%
+              </span>
             </div>
           </div>
-        </motion.div>
+        );
+      })}
+    </div>
+  )}
+</motion.div>
+
 
         {/* Referrals Table */}
         <motion.div
@@ -385,95 +401,130 @@ const Affiliate = () => {
           </div>
 
           {/* Desktop Table View */}
-          <div className="hidden lg:block overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-white/5">
-                  <th className="text-left text-xs font-medium text-gray-400 pb-3 px-2">User</th>
-                  <th className="text-left text-xs font-medium text-gray-400 pb-3 px-2">Join Date</th>
-                  <th className="text-left text-xs font-medium text-gray-400 pb-3 px-2">Total Deposited</th>
-                  <th className="text-left text-xs font-medium text-gray-400 pb-3 px-2">Your Commission</th>
-                  <th className="text-left text-xs font-medium text-gray-400 pb-3 px-2">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {mockReferrals.map((referral) => (
-                  <tr
-                    key={referral.id}
-                    className="border-b border-white/5 hover:bg-white/5 transition-colors"
-                  >
-                    <td className="py-4 px-2">
-                      <span className="text-sm text-white">{referral.email}</span>
-                    </td>
-                    <td className="py-4 px-2">
-                      <div className="text-sm text-gray-400">
-                        <div>{referral.joinDate}</div>
-                        <div className="text-xs text-gray-500">{referral.time}</div>
-                      </div>
-                    </td>
-                    <td className="py-4 px-2">
-                      <span className="text-sm text-white font-medium">
-                        ${referral.totalDeposited.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                      </span>
-                    </td>
-                    <td className="py-4 px-2">
-                      <span className="text-sm text-[#80ee64] font-semibold">
-                        ${referral.commission.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                      </span>
-                    </td>
-                    <td className="py-4 px-2">
-                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
-                        referral.status === 'active'
-                          ? 'bg-[#80ee64]/10 text-[#80ee64] border border-[#80ee64]/30'
-                          : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/30'
-                      }`}>
-                        {referral.status === 'active' ? <Check className="w-3 h-3" /> : <ArrowRight className="w-3 h-3" />}
-                        {referral.status === 'active' ? 'Active' : 'Pending'}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          {/* Desktop Table View */}
+<div className="hidden lg:block overflow-x-auto">
+  <table className="w-full">
+    <thead>
+      <tr className="border-b border-white/5">
+        <th className="text-left text-xs font-medium text-gray-400 pb-3 px-2">User</th>
+        <th className="text-left text-xs font-medium text-gray-400 pb-3 px-2">Join Date</th>
+        <th className="text-left text-xs font-medium text-gray-400 pb-3 px-2">Total Deposited</th>
+        <th className="text-left text-xs font-medium text-gray-400 pb-3 px-2">Your Commission</th>
+        <th className="text-left text-xs font-medium text-gray-400 pb-3 px-2">Status</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {stats.referrals.length > 0 ? (
+        stats.referrals.map((referral) => (
+          <tr
+            key={referral.user_id}
+            className="border-b border-white/5 hover:bg-white/5 transition-colors"
+          >
+            <td className="py-4 px-2">
+              <span className="text-sm text-white">{referral.email}</span>
+            </td>
+
+            <td className="py-4 px-2">
+              <div className="text-sm text-gray-400">
+                <div>{referral.join_date}</div>
+                <div className="text-xs text-gray-500">{referral.join_time}</div>
+              </div>
+            </td>
+
+            <td className="py-4 px-2">
+              <span className="text-sm text-white font-medium">
+                ${Number(referral.total_deposited).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+              </span>
+            </td>
+
+            <td className="py-4 px-2">
+              <span className="text-sm text-[#80ee64] font-semibold">
+                ${Number(referral.commission_earned).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+              </span>
+            </td>
+
+            <td className="py-4 px-2">
+              <span
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
+                  referral.status === 'active'
+                    ? 'bg-[#80ee64]/10 text-[#80ee64] border border-[#80ee64]/30'
+                    : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/30'
+                }`}
+              >
+                {referral.status === 'active' ? (
+                  <Check className="w-3 h-3" />
+                ) : (
+                  <ArrowRight className="w-3 h-3" />
+                )}
+                {referral.status === 'active' ? 'Active' : 'Pending'}
+              </span>
+            </td>
+          </tr>
+        ))
+      ) : (
+        <tr>
+          <td colSpan="5" className="py-6 text-center text-gray-500 text-sm">
+            No referrals found yet.
+          </td>
+        </tr>
+      )}
+    </tbody>
+  </table>
+</div>
+
 
           {/* Mobile Card View */}
-          <div className="lg:hidden space-y-3">
-            {mockReferrals.map((referral) => (
-              <div
-                key={referral.id}
-                className="bg-[#181A20] border border-white/5 rounded-xl p-4"
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <p className="text-sm font-semibold text-white">{referral.email}</p>
-                    <p className="text-xs text-gray-400 mt-1">{referral.joinDate} {referral.time}</p>
-                  </div>
-                  <span className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                    referral.status === 'active'
-                      ? 'bg-[#80ee64]/10 text-[#80ee64] border border-[#80ee64]/30'
-                      : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/30'
-                  }`}>
-                    {referral.status === 'active' ? 'Active' : 'Pending'}
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-xs text-gray-400">Total Deposited</span>
-                    <span className="text-xs text-white font-medium">
-                      ${referral.totalDeposited.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-xs text-gray-400">Your Commission</span>
-                    <span className="text-xs text-[#80ee64] font-semibold">
-                      ${referral.commission.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))}
+          {/* Mobile Card View */}
+<div className="lg:hidden space-y-3">
+  {stats.referrals.length > 0 ? (
+    stats.referrals.map((referral) => (
+      <div
+        key={referral.user_id}
+        className="bg-[#181A20] border border-white/5 rounded-xl p-4"
+      >
+        <div className="flex items-start justify-between mb-3">
+          <div>
+            <p className="text-sm font-semibold text-white">{referral.email}</p>
+            <p className="text-xs text-gray-400 mt-1">
+              {referral.join_date} {referral.join_time}
+            </p>
           </div>
+          <span
+            className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+              referral.status === 'active'
+                ? 'bg-[#80ee64]/10 text-[#80ee64] border border-[#80ee64]/30'
+                : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/30'
+            }`}
+          >
+            {referral.status === 'active' ? 'Active' : 'Pending'}
+          </span>
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex justify-between">
+            <span className="text-xs text-gray-400">Total Deposited</span>
+            <span className="text-xs text-white font-medium">
+              ${Number(referral.total_deposited).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+            </span>
+          </div>
+
+          <div className="flex justify-between">
+            <span className="text-xs text-gray-400">Your Commission</span>
+            <span className="text-xs text-[#80ee64] font-semibold">
+              ${Number(referral.commission_earned).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+            </span>
+          </div>
+        </div>
+      </div>
+    ))
+  ) : (
+    <p className="text-gray-500 text-sm text-center py-6">
+      No referrals found yet.
+    </p>
+  )}
+</div>
+
         </motion.div>
       </div>
     </>

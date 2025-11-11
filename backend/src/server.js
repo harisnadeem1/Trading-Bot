@@ -7,8 +7,8 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, async () => {
   try {
     await pool.connect();
-    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`Server running on port ${PORT}`);
   } catch (err) {
-    console.error("❌ Database connection failed:", err.message);
+    console.error("Database connection failed:", err.message);
   }
 });
