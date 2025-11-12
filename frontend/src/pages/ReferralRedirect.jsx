@@ -8,7 +8,7 @@ const ReferralRedirect = () => {
   useEffect(() => {
     if (code) {
       localStorage.setItem('referral_code', code);
-      console.log('Referral code saved:', code);
+      // console.log('Referral code saved:', code);
     }
     // redirect to signup
     navigate('/signup');

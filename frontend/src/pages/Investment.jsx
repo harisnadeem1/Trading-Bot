@@ -12,13 +12,20 @@ import {
   Sparkles,
   Target,
   Zap,
+  Star,
+  Crown,
+  Rocket,
 } from "lucide-react";
 
 // Map plan names to icons for visual consistency
 const iconMap = {
   "Starter Plan": Target,
-  "Advanced Plan": TrendingUp,
+  "Growth Plan": TrendingUp,
   "Pro Plan": Zap,
+  "Elite Plan": Star,
+  "Titan Plan": Crown,
+  // Fallback for any other plans
+  "Advanced Plan": Rocket,
   "Whale Plan": Sparkles,
 };
 
@@ -28,8 +35,6 @@ const Investment = () => {
   const [calculatedProfit, setCalculatedProfit] = useState(null);
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [activeInvestment, setActiveInvestment] = useState(null);
-
-
 
   useEffect(() => {
     const fetchActiveInvestment = async () => {
@@ -99,7 +104,6 @@ const Investment = () => {
         setTimeout(() => {
           window.location.href = "/dashboard/investment";
         }, 2000);
-
       } else {
         toast.error(res.data.message || "Could not start investment.");
       }
@@ -107,13 +111,10 @@ const Investment = () => {
       console.error("Error starting investment:", err);
       toast.error(
         err.response?.data?.message ||
-        "Something went wrong while starting your investment."
+          "Something went wrong while starting your investment."
       );
     }
   };
-
-
-
 
   // ✅ Calculate profit based on entered investment
   const calculateProfit = () => {
@@ -122,7 +123,8 @@ const Investment = () => {
 
     const plan = plans.find(
       (p) =>
-        amount >= p.min_amount && (p.max_amount === null || amount <= p.max_amount)
+        amount >= p.min_amount &&
+        (p.max_amount === null || amount <= p.max_amount)
     );
 
     if (!plan) return;
@@ -168,9 +170,11 @@ const Investment = () => {
         >
           {activeInvestment ? (
             <>
-              <h2 className="text-xl font-bold text-[#80ee64] mb-2">Active Investment</h2>
+              <h2 className="text-xl font-bold text-[#80ee64] mb-2">
+                Active Investment
+              </h2>
               <p className="text-sm text-gray-400 mb-5 max-w-md">
-                You’re currently enrolled in the{" "}
+                You're currently enrolled in the{" "}
                 <span className="text-white font-semibold">
                   {activeInvestment.plan_name}
                 </span>{" "}
@@ -202,7 +206,10 @@ const Investment = () => {
               {/* Progress Bar */}
               <div className="w-full max-w-sm text-left">
                 <div className="flex justify-between text-xs text-gray-400 mb-1">
-                  <span>{activeInvestment.elapsed_days} / {activeInvestment.duration_days} days</span>
+                  <span>
+                    {activeInvestment.elapsed_days} /{" "}
+                    {activeInvestment.duration_days} days
+                  </span>
                   <span>{activeInvestment.progress}%</span>
                 </div>
                 <div className="w-full h-2 bg-[#181A20] rounded-full overflow-hidden">
@@ -214,15 +221,16 @@ const Investment = () => {
                   ></motion.div>
                 </div>
               </div>
-
-              
             </>
           ) : (
             <>
-              <h2 className="text-xl font-bold text-white mb-2">Ready to Start?</h2>
+              <h2 className="text-xl font-bold text-white mb-2">
+                Ready to Start?
+              </h2>
               <p className="text-sm text-gray-400 mb-5 max-w-md">
-                The system will automatically detect your eligible plan based on your wallet balance.
-                Once started, you'll receive daily ROI updates automatically.
+                The system will automatically detect your eligible plan based on
+                your wallet balance. Once started, you'll receive daily ROI
+                updates automatically.
               </p>
 
               <motion.button
@@ -238,8 +246,8 @@ const Investment = () => {
           )}
         </motion.div>
 
-        {/* Plans Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 ">
+        {/* Plans Grid - Changed to 3 columns */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {plans.map((plan, index) => {
             const IconComponent = iconMap[plan.name] || Target;
             return (
@@ -296,8 +304,9 @@ const Investment = () => {
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-gray-400">Auto ROI</span>
                       <span
-                        className={`font-medium ${plan.auto_roi ? "text-[#80ee64]" : "text-gray-400"
-                          }`}
+                        className={`font-medium ${
+                          plan.auto_roi ? "text-[#80ee64]" : "text-gray-400"
+                        }`}
                       >
                         {plan.auto_roi ? "Enabled" : "Disabled"}
                       </span>
@@ -307,16 +316,13 @@ const Investment = () => {
 
                 {/* Info Note */}
                 <p className="text-xs text-gray-500 italic text-center">
-                  Automatically applied when your balance matches this plan range
+                  Automatically applied when your balance matches this plan
+                  range
                 </p>
               </motion.div>
             );
           })}
         </div>
-
-
-
-
 
         {/* Calculator Section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 !mt-[1.5rem]">
@@ -457,7 +463,7 @@ const Investment = () => {
                     High Returns
                   </h4>
                   <p className="text-xs text-gray-400">
-                    Earn up to 10% monthly ROI on your investments
+                    Earn up to 25% monthly ROI on your investments
                   </p>
                 </div>
               </div>

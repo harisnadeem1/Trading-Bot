@@ -1,85 +1,117 @@
 import pool from "../config/db.js";
 
-// 🧮 Get affiliate stats & referral list
 export const getAffiliateDashboard = async (req, res) => {
+  const client = await pool.connect();
   try {
     const userId = req.user.id;
 
-    // Total referrals (anyone signed up with their code)
-    const totalReferralsQuery = `
+    // 1️⃣ Total Referrals (users referred by this user)
+    const totalReferralsRes = await client.query(`
       SELECT COUNT(*) AS total_referrals
       FROM users
-      WHERE referred_by = (
-        SELECT referral_code FROM users WHERE id = $1
-      );
-    `;
+      WHERE referred_by = (SELECT referral_code FROM users WHERE id = $1)
+    `, [userId]);
 
-    // Active referrals (those who invested)
-    const activeReferralsQuery = `
-      SELECT COUNT(DISTINCT i.user_id) AS active_referrals
+    // 2️⃣ Active Referrals (those who made approved deposits)
+    const activeReferralsRes = await client.query(`
+      SELECT COUNT(DISTINCT u.id) AS active_referrals
       FROM users u
-      JOIN investments i ON u.id = i.user_id
-      WHERE u.referred_by = (
-        SELECT referral_code FROM users WHERE id = $1
-      )
-      AND i.status = 'active';
-    `;
+      JOIN transactions t ON t.user_id = u.id
+      WHERE u.referred_by = (SELECT referral_code FROM users WHERE id = $1)
+      AND t.tx_type = 'deposit'
+      AND t.status = 'approved'
+    `, [userId]);
 
-    // Total affiliate earnings
-    const totalEarningsQuery = `
+    // 3️⃣ Total earnings
+    const totalEarningsRes = await client.query(`
       SELECT COALESCE(SUM(amount), 0) AS total_earned
       FROM transactions
-      WHERE user_id = $1 AND tx_type = 'referral_commission';
-    `;
+      WHERE user_id = $1
+      AND tx_type IN ('referral_direct','referral_passive')
+      AND status = 'approved'
+    `, [userId]);
 
-    // Detailed referral list
-    const referralListQuery = `
-      SELECT 
-        u.id AS user_id,
-        u.email,
-        TO_CHAR(u.created_at, 'YYYY-MM-DD') AS join_date,
-        TO_CHAR(u.created_at, 'HH24:MI') AS join_time,
-        COALESCE(SUM(i.amount), 0) AS total_deposited,
-        COALESCE(SUM(t.amount), 0) AS commission_earned,
-        CASE WHEN SUM(i.amount) > 0 THEN 'active' ELSE 'pending' END AS status
-      FROM users u
-      LEFT JOIN investments i ON u.id = i.user_id
-      LEFT JOIN transactions t ON t.user_id = $1 AND t.tx_type = 'referral_commission'
-      WHERE u.referred_by = (
-        SELECT referral_code FROM users WHERE id = $1
+    // 4️⃣ Referral details — commissions rolled up under level-1 users
+    const referralListRes = await client.query(`
+      WITH RECURSIVE referral_tree AS (
+        SELECT 
+          u.id AS user_id,
+          u.email,
+          u.created_at,
+          1 AS level,
+          u.id AS top_level_id
+        FROM users u
+        WHERE u.referred_by = (SELECT referral_code FROM users WHERE id = $1)
+
+        UNION ALL
+
+        SELECT 
+          c.id AS user_id,
+          c.email,
+          c.created_at,
+          rt.level + 1 AS level,
+          rt.top_level_id
+        FROM users c
+        INNER JOIN referral_tree rt ON c.referred_by = (SELECT referral_code FROM users WHERE id = rt.user_id)
+        WHERE rt.level < 5
       )
-      GROUP BY u.id, u.email, u.created_at
-      ORDER BY u.created_at DESC;
-    `;
+      SELECT 
+        tl.user_id,
+        tl.email,
+        TO_CHAR(tl.created_at, 'YYYY-MM-DD') AS join_date,
+        TO_CHAR(tl.created_at, 'HH24:MI') AS join_time,
+        COALESCE((
+          SELECT SUM(t.amount)
+          FROM transactions t
+          WHERE t.user_id = tl.user_id
+            AND t.tx_type = 'deposit'
+            AND t.status = 'approved'
+        ), 0) AS total_deposited,
+        COALESCE((
+          SELECT SUM(tx.amount)
+          FROM transactions tx
+          WHERE tx.user_id = $1
+            AND tx.related_user_id IN (
+              SELECT user_id FROM referral_tree WHERE top_level_id = tl.user_id
+            )
+            AND tx.tx_type IN ('referral_direct','referral_passive')
+            AND tx.status = 'approved'
+        ), 0) AS commission_earned,
+        CASE 
+          WHEN EXISTS (
+            SELECT 1 FROM transactions t2
+            WHERE t2.user_id = tl.user_id
+              AND t2.tx_type = 'deposit'
+              AND t2.status = 'approved'
+          ) THEN 'active'
+          ELSE 'pending'
+        END AS status
+      FROM referral_tree tl
+      WHERE tl.level = 1
+      ORDER BY tl.created_at DESC
+    `, [userId]);
 
-    const client = await pool.connect();
-
-    const [
-      totalReferralsRes,
-      activeReferralsRes,
-      totalEarningsRes,
-      referralListRes,
-    ] = await Promise.all([
-      client.query(totalReferralsQuery, [userId]),
-      client.query(activeReferralsQuery, [userId]),
-      client.query(totalEarningsQuery, [userId]),
-      client.query(referralListQuery, [userId]),
-    ]);
-
-    client.release();
+    // ✅ Removed extra client.release() here
 
     res.json({
       success: true,
       data: {
-        totalReferrals: parseInt(totalReferralsRes.rows[0].total_referrals, 10),
-        activeReferrals: parseInt(activeReferralsRes.rows[0].active_referrals, 10),
-        totalEarnings: parseFloat(totalEarningsRes.rows[0].total_earned).toFixed(2),
-        referrals: referralListRes.rows,
+        totalReferrals: Number(totalReferralsRes.rows[0]?.total_referrals || 0),
+        activeReferrals: Number(activeReferralsRes.rows[0]?.active_referrals || 0),
+        totalEarnings: parseFloat(totalEarningsRes.rows[0]?.total_earned || 0).toFixed(2),
+        referrals: referralListRes.rows.map((r) => ({
+          ...r,
+          total_deposited: Number(r.total_deposited || 0).toFixed(2),
+          commission_earned: Number(r.commission_earned || 0).toFixed(2),
+        })),
       },
     });
   } catch (err) {
+    await client.query("ROLLBACK").catch(() => {});
     console.error("❌ Error fetching affiliate dashboard:", err);
     res.status(500).json({ success: false, message: "Internal server error" });
+  } finally {
+    client.release(); // ✅ only once
   }
 };
 

@@ -12,6 +12,7 @@ import { startDailyJobs } from "./cron/dailyJobs.js";
 import withdrawalRoutes from "./routes/withdrawalRoutes.js";
 import adminTransactionRoutes from "./routes/adminTransactionRoutes.js";
 import affiliateRoutes from "./routes/affiliateRoutes.js";
+import depositRoutes from "./routes/depositRoutes.js";
 dotenv.config();
 
 const app = express();
@@ -33,8 +34,7 @@ app.use("/api/plans", planRoutes);
 app.use("/api/invest", investmentRoutes);
 app.use("/api/withdraw", withdrawalRoutes);
 app.use("/api/affiliate", affiliateRoutes);
-
-
+app.use("/api/deposits", depositRoutes);
 
 
 app.use("/api/admin/plans", adminPlansRoutes);

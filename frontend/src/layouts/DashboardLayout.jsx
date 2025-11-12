@@ -32,6 +32,8 @@ const DashboardLayout = () => {
     navigate('/');
   };
 
+  console.log("currentUser:", currentUser);
+
   return (
     <div className="min-h-screen bg-[#181A20] text-white">
       {/* Desktop Layout */}
@@ -83,7 +85,7 @@ const DashboardLayout = () => {
                     <User className="w-5 h-5 text-[#80ee64]" />
                   </div>
                   <div className="hidden xl:block">
-                    <p className="text-sm font-medium text-white">{currentUser?.username || 'User'}</p>
+                    <p className="text-sm font-medium text-white">{currentUser?.full_name || 'User'}</p>
                     <p className="text-xs text-gray-400">{currentUser?.email || 'user@example.com'}</p>
                   </div>
                 </div>
@@ -195,7 +197,7 @@ const DashboardLayout = () => {
                       <User className="w-7 h-7 text-[#80ee64]" />
                     </div>
                     <div className="flex-1">
-                      <p className="text-base font-semibold text-white">{currentUser?.username || 'User'}</p>
+                      <p className="text-base font-semibold text-white">{currentUser?.full_name || 'User'}</p>
                       <p className="text-sm text-gray-400">{currentUser?.email || 'user@example.com'}</p>
                     </div>
                   </div>

@@ -38,7 +38,7 @@ export const getDashboardData = async (req, res) => {
       }))
       .reverse();
 
-    // 3️⃣ Fetch full balance history for chart overview (auto adapt to available data)
+    // 3️⃣ Fetch full balance history and ensure today's point always exists
     const historyRes = await pool.query(
       `SELECT date, balance
        FROM user_balance_snapshots
@@ -47,7 +47,7 @@ export const getDashboardData = async (req, res) => {
       [userId]
     );
 
-    const balanceData = historyRes.rows.map((row) => ({
+    let balanceData = historyRes.rows.map((row) => ({
       name: new Date(row.date).toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
@@ -59,6 +59,44 @@ export const getDashboardData = async (req, res) => {
         year: "numeric",
       }),
     }));
+
+    // 🧩 If user has no snapshot data yet — create placeholder chart
+    if (balanceData.length === 0) {
+      const today = new Date();
+      const startDate = new Date(today);
+      startDate.setDate(today.getDate() - 7); // show last 7 days
+
+      const tempData = [];
+      for (let d = new Date(startDate); d <= today; d.setDate(d.getDate() + 1)) {
+        tempData.push({
+          name: d.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+          value: d.toDateString() === today.toDateString() ? Number(user.balance) : 0,
+          fullDate: d.toLocaleDateString("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+          }),
+        });
+      }
+      balanceData = tempData;
+    } else {
+      // ✅ Ensure today's balance is included (even before cron adds snapshot)
+      const todayStr = new Date().toISOString().split("T")[0];
+      const lastEntry = balanceData[balanceData.length - 1];
+      const lastDateStr = new Date(lastEntry.fullDate).toISOString().split("T")[0];
+
+      if (todayStr !== lastDateStr) {
+        balanceData.push({
+          name: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+          value: Number(user.balance),
+          fullDate: new Date().toLocaleDateString("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+          }),
+        });
+      }
+    }
 
     // Calculate total, average profit per day, and growth percentage
     let totalBalance = 0,
@@ -100,6 +138,18 @@ export const getDashboardData = async (req, res) => {
         desc: (amt) => `+$${amt.toFixed(2)} ROI earned`,
         color: "green",
         icon: "TrendingUp",
+      },
+      referral_direct: {
+        title: "Referral Commission",
+        desc: (amt) => `+$${amt.toFixed(2)} earned from your referral`,
+        color: "purple",
+        icon: "Users",
+      },
+      referral_passive: {
+        title: "Team Commission",
+        desc: (amt) => `+$${amt.toFixed(2)} earned from your team`,
+        color: "indigo",
+        icon: "Users",
       },
       referral_commission: {
         title: "Affiliate Bonus",
@@ -158,11 +208,11 @@ export const getDashboardData = async (req, res) => {
       totalWithdrawals: Number(user.total_withdrawals),
       activeInvestments,
       balanceChart,
-      balanceData,       // ✅ main chart data
-      totalBalance,      // ✅ total from chart
-      avgProfit,         // ✅ average gain
-      growthPercent,     // ✅ growth %
-      todayPnL,          // ✅ today’s up/down
+      balanceData, // ✅ always has at least flat-zero + today's balance
+      totalBalance,
+      avgProfit,
+      growthPercent,
+      todayPnL,
       pnlPercent,
       activity,
     });

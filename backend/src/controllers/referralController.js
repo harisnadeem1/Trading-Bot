@@ -1,7 +1,6 @@
 import pool from "../config/db.js";
 
 export const getReferralLink = async (req, res) => {
-    console.log("🔍 Fetching referral link for user ID:", req.user.id);
   try {
     const userId = req.user.id;
     const user = await pool.query(
@@ -14,7 +13,7 @@ export const getReferralLink = async (req, res) => {
     }
 
     const referralCode = user.rows[0].referral_code;
-    const baseUrl = process.env.REFERRAL_BASE_URL || "https://novatrade.ai/ref";
+    const baseUrl = process.env.REFERRAL_BASE_URL ;
     const referralLink = `${baseUrl}/${referralCode}`;
 
     res.json({ referral_code: referralCode, referral_link: referralLink });

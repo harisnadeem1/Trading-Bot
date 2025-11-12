@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { DollarSign, TrendingUp, Users, Package, ArrowUpRight, ArrowDownRight, Eye, EyeOff, ChevronDown } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Area, AreaChart } from 'recharts';
 import { useAuthStore } from '../store/authStore';
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const [isBalanceVisible, setIsBalanceVisible] = useState(true);
@@ -14,7 +15,7 @@ const Dashboard = () => {
   const { currentUser } = useAuthStore();
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
-  console.log("Current User in Dashboard:", currentUser);
+  const navigate = useNavigate();
 
 
   useEffect(() => {
@@ -58,13 +59,13 @@ const Dashboard = () => {
   // ✅ Generate full date range with actual data points
   const filteredProfitData = useMemo(() => {
     if (!dashboardData?.balanceData || dashboardData.balanceData.length === 0) {
-      console.log("❌ No dashboard data available");
+      // console.log("❌ No dashboard data available");
       return [];
     }
 
     const data = dashboardData.balanceData;
-    console.log("📊 Raw data count:", data.length);
-    console.log("📅 Time filter:", timeFilter);
+    // console.log("📊 Raw data count:", data.length);
+    // console.log("📅 Time filter:", timeFilter);
 
     // Parse dates and sort data (ensure chronological order)
     const sortedData = [...data].sort((a, b) => new Date(a.fullDate) - new Date(b.fullDate));
@@ -72,7 +73,7 @@ const Dashboard = () => {
     const oldestDataDate = new Date(sortedData[0].fullDate);
     const newestDataDate = new Date(sortedData[sortedData.length - 1].fullDate);
 
-    console.log("📅 Data range:", oldestDataDate.toLocaleDateString(), "to", newestDataDate.toLocaleDateString());
+    // console.log("📅 Data range:", oldestDataDate.toLocaleDateString(), "to", newestDataDate.toLocaleDateString());
 
     // Calculate start date based on filter (from today)
     const today = new Date();
@@ -92,7 +93,7 @@ const Dashboard = () => {
       daysToShow = 90;
     }
 
-    console.log("📅 Chart range:", startDate.toLocaleDateString(), "to", today.toLocaleDateString());
+    // console.log("📅 Chart range:", startDate.toLocaleDateString(), "to", today.toLocaleDateString());
 
     // Create a map of existing data by date
     const dataMap = new Map();
@@ -126,8 +127,8 @@ const Dashboard = () => {
       currentDate.setDate(currentDate.getDate() + 1);
     }
 
-    console.log("✅ Generated data points:", fullRangeData.length);
-    console.log("✅ Points with actual data:", fullRangeData.filter(d => d.hasData).length);
+    // console.log("✅ Generated data points:", fullRangeData.length);
+    // console.log("✅ Points with actual data:", fullRangeData.filter(d => d.hasData).length);
 
     return fullRangeData;
   }, [dashboardData, timeFilter]);
@@ -292,6 +293,7 @@ const Dashboard = () => {
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.97 }}
+                    onClick={() => navigate('/dashboard/deposit')}
                     className="px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 text-white font-medium text-sm transition-all border border-white/5 hover:border-white/10 whitespace-nowrap"
                   >
                     Deposit
@@ -300,6 +302,7 @@ const Dashboard = () => {
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.97 }}
+                    onClick={() => navigate('/dashboard/withdraw')}
                     className="px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 text-white font-medium text-sm transition-all border border-white/5 hover:border-white/10 whitespace-nowrap"
                   >
                     Withdraw
@@ -316,6 +319,7 @@ const Dashboard = () => {
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.97 }}
+                    onClick={() => navigate('/dashboard/deposit')}
                     className="px-5 py-2.5 rounded-full bg-white/5 hover:bg-white/10 text-white font-medium text-sm transition-all border border-white/5 hover:border-white/10"
                   >
                     Deposit
@@ -324,6 +328,7 @@ const Dashboard = () => {
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.97 }}
+                    onClick={() => navigate('/dashboard/withdraw')}
                     className="px-5 py-2.5 rounded-full bg-white/5 hover:bg-white/10 text-white font-medium text-sm transition-all border border-white/5 hover:border-white/10"
                   >
                     Withdraw
@@ -331,52 +336,82 @@ const Dashboard = () => {
                 </div>
 
                 {/* Mini Chart */}
-                <div className="w-[210px] mt-3">
-                  <div className="h-[100px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={dashboardData?.balanceChart || []}>
-                        <defs>
-                          <linearGradient id="balanceGradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#80ee64" stopOpacity={0.3} />
-                            <stop offset="95%" stopColor="#80ee64" stopOpacity={0} />
-                          </linearGradient>
-                        </defs>
+<div className="w-[210px] mt-3">
+  <div className="h-[100px]">
+    <ResponsiveContainer width="100%" height="100%">
+      <AreaChart
+        data={
+          dashboardData?.balanceChart?.length
+            ? dashboardData.balanceChart
+            : (() => {
+                const today = new Date();
+                const temp = [];
+                // show 7 baseline points ending at today's balance
+                for (let i = 6; i >= 0; i--) {
+                  const d = new Date();
+                  d.setDate(today.getDate() - i);
+                  temp.push({
+                    value:
+                      i === 0
+                        ? Number(dashboardData?.balance || 0)
+                        : 0,
+                    date: d.toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                    }),
+                  });
+                }
+                return temp;
+              })()
+        }
+      >
+        <defs>
+          <linearGradient id="balanceGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="#80ee64" stopOpacity={0.3} />
+            <stop offset="95%" stopColor="#80ee64" stopOpacity={0} />
+          </linearGradient>
+        </defs>
 
-                        <Tooltip
-                          content={({ active, payload }) => {
-                            if (active && payload && payload.length) {
-                              return (
-                                <div className="bg-[#1a1d24] border border-white/10 rounded-xl px-3 py-2 shadow-xl">
-                                  <p className="text-sm font-bold text-white">
-                                    ${payload[0].value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                  </p>
-                                </div>
-                              );
-                            }
-                            return null;
-                          }}
-                          cursor={{ stroke: '#80ee64', strokeWidth: 1 }}
-                        />
-
-                        <Area
-                          type="monotone"
-                          dataKey="value"
-                          stroke="#80ee64"
-                          strokeWidth={2}
-                          fill="url(#balanceGradient)"
-                          dot={false}
-                          activeDot={{
-                            r: 4,
-                            fill: '#80ee64',
-                            stroke: '#0F1014',
-                            strokeWidth: 2
-                          }}
-                          isAnimationActive={true}
-                        />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </div>
+        <Tooltip
+          content={({ active, payload }) => {
+            if (active && payload && payload.length) {
+              return (
+                <div className="bg-[#1a1d24] border border-white/10 rounded-xl px-3 py-2 shadow-xl">
+                  <p className="text-sm font-bold text-white">
+                    $
+                    {payload[0].value.toLocaleString("en-US", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                  </p>
                 </div>
+              );
+            }
+            return null;
+          }}
+          cursor={{ stroke: "#80ee64", strokeWidth: 1 }}
+        />
+
+        <Area
+          type="monotone"
+          dataKey="value"
+          stroke="#80ee64"
+          strokeWidth={2}
+          fill="url(#balanceGradient)"
+          dot={false}
+          activeDot={{
+            r: 4,
+            fill: "#80ee64",
+            stroke: "#0F1014",
+            strokeWidth: 2,
+          }}
+          isAnimationActive={true}
+        />
+      </AreaChart>
+    </ResponsiveContainer>
+  </div>
+</div>
+
               </div>
             </div>
           </div>
@@ -525,15 +560,15 @@ const Dashboard = () => {
 
             {/* Chart */}
             <div className="relative chart-container">
-              <style jsx>{`
-                .chart-container :global(.recharts-yAxis .recharts-cartesian-axis-tick text) {
-                  position: relative;
-                  z-index: 100 !important;
-                }
-                .chart-container :global(.recharts-yAxis) {
-                  z-index: 100 !important;
-                }
-              `}</style>
+            <style>{`
+  .chart-container .recharts-yAxis .recharts-cartesian-axis-tick text {
+    position: relative;
+    z-index: 100 !important;
+  }
+  .chart-container .recharts-yAxis {
+    z-index: 100 !important;
+  }
+`}</style>
 
               <div style={{ width: "100%", height: 280 }} className="sm:h-[340px]">
                 <ResponsiveContainer>
