@@ -103,76 +103,97 @@ const Hero = () => {
           </p>
 
 
-         {/* Specifications */}
-<div className="bg-[#212525] border border-[#2a2d2d] rounded-2xl p-6 mb-8 max-w-xl mx-auto lg:mx-0 relative z-30">
-  <div className="flex items-center gap-2 mb-6">
-    <div className="w-3 h-3 rounded-full bg-[#80ee64] animate-pulse"></div>
-    <h3 className="text-white text-lg font-medium">Specifications</h3>
-  </div>
+          {/* Specifications */}
+          <div className="bg-[#212525] border border-[#2a2d2d] rounded-2xl p-6 mb-8 max-w-xl mx-auto lg:mx-0 relative z-30">
+            <div className="flex items-center gap-2 mb-6">
+              <div className="w-3 h-3 rounded-full bg-[#80ee64] animate-pulse"></div>
+              <h3 className="text-white text-lg font-medium">Specifications</h3>
+            </div>
 
-  <div className="space-y-6">
-    {[
-      ['Speed of Execution', 90],
-      ['Market Adaptability', 64],
-      ['Risk Mitigation', 70],
-      ['Profit Consistency', 83],
-      ['Customization Options', 51],
-    ].map(([label, percent]) => (
-      <div key={label}>
-        {/* Label Row */}
-        <div className="flex justify-between mb-2">
-          <span className="text-[#e6e6e6] text-sm">{label}</span>
-          <span className="text-white font-semibold">{percent}%</span>
-        </div>
+            <div className="space-y-6">
+              {[
+                ['Speed of Execution', 90],
+                ['Market Adaptability', 64],
+                ['Risk Mitigation', 70],
+                ['Profit Consistency', 83],
+                ['Customization Options', 51],
+              ].map(([label, percent]) => (
+                <div key={label}>
+                  {/* Label Row */}
+                  <div className="flex justify-between mb-2">
+                    <span className="text-[#e6e6e6] text-sm">{label}</span>
+                    <span className="text-white font-semibold">{percent}%</span>
+                  </div>
 
-        {/* 6-Segment Progress Bar */}
-        <div className="flex justify-between items-center gap-[4px]">
-          {Array.from({ length: 6 }).map((_, i) => {
-            // Calculate how many segments should be filled based on percent
-            const filledSegments = Math.floor(percent / (100 / 6));
-            const isFilled = i < filledSegments;
-            const partialFill =
-              i === filledSegments && percent % (100 / 6) !== 0
-                ? ((percent % (100 / 6)) / (100 / 6)) * 100
-                : null;
+                  {/* 6-Segment Progress Bar */}
+                  <div className="flex justify-between items-center gap-[4px]">
+                    {Array.from({ length: 6 }).map((_, i) => {
+                      // Calculate how many segments should be filled based on percent
+                      const filledSegments = Math.floor(percent / (100 / 6));
+                      const isFilled = i < filledSegments;
+                      const partialFill =
+                        i === filledSegments && percent % (100 / 6) !== 0
+                          ? ((percent % (100 / 6)) / (100 / 6)) * 100
+                          : null;
 
-            return (
-              <div
-                key={i}
-                className="flex-1 h-[6px] bg-[#2e3232] rounded-full overflow-hidden"
-              >
-                {isFilled ? (
-                  <div className="w-full h-full bg-[#80ee64]"></div>
-                ) : partialFill ? (
-                  <div
-                    className="h-full bg-[#80ee64]"
-                    style={{ width: `${partialFill}%` }}
-                  ></div>
-                ) : null}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    ))}
-  </div>
-</div>
+                      return (
+                        <div
+                          key={i}
+                          className="flex-1 h-[6px] bg-[#2e3232] rounded-full overflow-hidden"
+                        >
+                          {isFilled ? (
+                            <div className="w-full h-full bg-[#80ee64]"></div>
+                          ) : partialFill ? (
+                            <div
+                              className="h-full bg-[#80ee64]"
+                              style={{ width: `${partialFill}%` }}
+                            ></div>
+                          ) : null}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
 
 
           {/* Buttons */}
-          <div className='flex flex-col sm:flex-row gap-4 justify-center lg:justify-start'>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
             <Button
-              onClick={() => openAuthModal('signup')}
-              className='bg-[#80ee64] hover:bg-[#70de54] text-black font-semibold px-8 h-12 rounded-full text-[15px] shadow-lg shadow-[#80ee64]/20 hover:shadow-[#80ee64]/30 transition-all duration-300'
+              onClick={() => {
+                const section = document.getElementById("investment-plans");
+                if (section) {
+                  const yOffset = -100; // 👈 adjust this (-60 to -120) depending on your header height
+                  const y =
+                    section.getBoundingClientRect().top + window.pageYOffset + yOffset;
+
+                  window.scrollTo({ top: y, behavior: "smooth" });
+                }
+              }}
+              className="bg-[#80ee64] hover:bg-[#70de54] text-black font-semibold px-8 h-12 rounded-full text-[15px] shadow-lg shadow-[#80ee64]/20 hover:shadow-[#80ee64]/30 transition-all duration-300"
             >
               ROI Levels
             </Button>
+
             <Button
-              variant='outline'
-              className='bg-transparent text-white border-2 border-white hover:bg-white hover:text-black px-8 h-12 rounded-full text-[15px] transition-all duration-300'
+              variant="outline"
+              onClick={() => {
+                const section = document.getElementById("how-it-works");
+                if (section) {
+                  const yOffset = -30; // adjust if needed
+                  const y =
+                    section.getBoundingClientRect().top + window.pageYOffset + yOffset;
+
+                  window.scrollTo({ top: y, behavior: "smooth" });
+                }
+              }}
+              className="bg-transparent text-white border-2 border-white hover:bg-white hover:text-black px-8 h-12 rounded-full text-[15px] transition-all duration-300"
             >
               How It Wins
             </Button>
+
           </div>
         </motion.div>
       </div>

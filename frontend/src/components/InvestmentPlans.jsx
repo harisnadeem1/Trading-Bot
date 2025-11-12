@@ -2,18 +2,20 @@ import React from "react";
 import { motion } from "framer-motion";
 import { TrendingUp, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuthStore } from '@/store/authStore';
 
 const plans = [
-  { tier: "$50k - $75k", roi: 4, height: 45, color: "from-[#404645] to-[#404645]", text: "text-[#c2c2c2]" },
-  { tier: "$75k - $100k", roi: 6, height: 60, color: "from-[#505755] to-[#505755]", text: "text-[#e5e5e5]" },
-  { tier: "$100k - $125k", roi: 8, height: 75, color: "from-[#5edb61] to-[#4ed04e]", text: "text-black" },
-  { tier: "$125k - $150k", roi: 9, height: 85, color: "from-[#72f36e] to-[#5ef75b]", text: "text-black" },
-  { tier: "$150k+", roi: 10, height: 95, color: "from-[#8ffb86] to-[#7cf976]", text: "text-black" },
+  { tier: "$50 - $499", roi: 10, height: 45, color: "from-[#404645] to-[#404645]", text: "text-[#c2c2c2]" },
+  { tier: "$500 - $1999", roi: 12.5, height: 55, color: "from-[#505755] to-[#505755]", text: "text-[#e5e5e5]" },
+  { tier: "$2000 - $9999", roi: 16.5, height: 70, color: "from-[#5edb61] to-[#4ed04e]", text: "text-black" },
+  { tier: "$10000 - $49999", roi: 20, height: 85, color: "from-[#72f36e] to-[#5ef75b]", text: "text-black" },
+  { tier: "$50k+", roi: 25, height: 100, color: "from-[#8ffb86] to-[#7cf976]", text: "text-black" },
 ];
 
 const InvestmentPlans = () => {
+  const { openAuthModal } = useAuthStore();
   return (
-    <section className="relative bg-black text-white py-12 md:py-16 lg:py-24 px-0 sm:px-0 overflow-hidden">
+    <section id="investment-plans" className="relative bg-black text-white py-12 md:py-16 lg:py-24 px-0 sm:px-0 overflow-hidden">
       <div className="container mx-auto max-w-7xl grid lg:grid-cols-2 items-center gap-8 md:gap-12 lg:gap-16">
 
         {/* Left - Bar Chart (Vertical on desktop, Horizontal on mobile) */}
@@ -125,6 +127,7 @@ const InvestmentPlans = () => {
           <div className="flex flex-col sm:flex-row gap-3 pt-2">
 
             <Button
+  onClick={() => openAuthModal('signup')}
   className="bg-[#80ee64] hover:bg-[#70de54] text-black font-semibold 
              px-8 md:px-10 py-7 md:py-7 text-base md:text-lg 
              rounded-full transition-all duration-300 

@@ -9,6 +9,7 @@ const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { isAuthenticated, openAuthModal } = useAuthStore();
+const isLoggedIn = isAuthenticated(); // ✅ Call the function to get actual boolean
   const location = useLocation();
 
   useEffect(() => {
@@ -20,8 +21,11 @@ const Header = () => {
   const navLinks = [
     { name: 'Home', href: '/' },
     { name: 'Investment Plans', href: '/#investment-plans' },
-    { name: 'Affiliate', href: '/#affiliate-program' },
-    { name: 'Contact', href: '/contact' },
+    { name: 'How it Works', href: '/#how-it-works' },
+    { name: 'Affiliate', href: '/#affiliate' },
+
+    { name: 'Benefits', href: '/#benefits' },
+
   ];
 
   useEffect(() => {
@@ -146,20 +150,20 @@ const Header = () => {
 
             {/* Right Side - Desktop */}
             <div className="hidden md:flex items-center gap-3 flex-shrink-0 ml-6">
-              {isAuthenticated ? (
-                <Link to="/dashboard">
-                  <Button className="bg-[#80ee64] hover:bg-[#70de54] text-black font-semibold rounded-full px-8 h-12 text-[15px] shadow-lg shadow-[#80ee64]/20 hover:shadow-[#80ee64]/30 transition-all duration-300">
-                    Sign Up
-                  </Button>
-                </Link>
-              ) : (
-                <Button 
-                  onClick={() => openAuthModal('signup')} 
-                  className="bg-[#80ee64] hover:bg-[#70de54] text-black font-semibold px-8 h-12 text-[15px] rounded-full shadow-lg shadow-[#80ee64]/20 hover:shadow-[#80ee64]/30 transition-all duration-300"
-                >
-                  Sign Up
-                </Button>
-              )}
+              {isLoggedIn ? (
+  <Link to="/dashboard">
+    <Button className="bg-[#80ee64] hover:bg-[#70de54] text-black font-semibold rounded-full px-8 h-12 text-[15px] shadow-lg shadow-[#80ee64]/20 hover:shadow-[#80ee64]/30 transition-all duration-300">
+      Dashboard
+    </Button>
+  </Link>
+) : (
+  <Button 
+    onClick={() => openAuthModal('signup')} 
+    className="bg-[#80ee64] hover:bg-[#70de54] text-black font-semibold px-8 h-12 text-[15px] rounded-full shadow-lg shadow-[#80ee64]/20 hover:shadow-[#80ee64]/30 transition-all duration-300"
+  >
+    Sign Up
+  </Button>
+)}
             </div>
 
             {/* Mobile Right Side - Signup + Menu */}

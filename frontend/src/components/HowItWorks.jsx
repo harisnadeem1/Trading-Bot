@@ -64,7 +64,7 @@ const features = [
 
 const TheBrain = () => {
   return (
-    <section className="relative bg-black text-white py-20 px-0 sm:px-6 overflow-hidden">
+    <section id="how-it-works" className="relative bg-black text-white py-20 px-0 sm:px-6 overflow-hidden">
       <div className="container mx-auto max-w-full">
         {/* DESKTOP GRID */}
         <div className="hidden md:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 border border-[#2a2d2d] rounded-[36px] overflow-hidden">

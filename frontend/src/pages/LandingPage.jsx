@@ -9,6 +9,7 @@ import HowItWorks from '@/components/HowItWorks';
 import AffiliateProgram from '@/components/AffiliateProgram';
 import Benefits from '@/components/Benefits';
 import Footer from '@/components/Footer';
+import AffiliateSection from '@/components/AffiliateSection';
 
 function LandingPage() {
   return (
@@ -23,6 +24,8 @@ function LandingPage() {
         <InvestmentPlans />
         <HowItWorks />
         <AffiliateProgram />
+        <AffiliateSection />
+
         <Benefits />
         <Footer />
       </div>
