@@ -154,10 +154,10 @@ const Investment = () => {
   return (
     <>
       <Helmet>
-        <title>Investment Plans - NovaTrade AI</title>
+        <title>Investment Plans - Impulse Edge</title>
         <meta
           name="description"
-          content="Explore investment plans and calculate your potential profits with NovaTrade AI."
+          content="Explore investment plans and calculate your potential profits with Impulse Edge."
         />
       </Helmet>
 

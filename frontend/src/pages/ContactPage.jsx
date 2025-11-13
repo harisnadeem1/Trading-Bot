@@ -23,8 +23,8 @@ const ContactPage = () => {
   return (
     <>
       <Helmet>
-        <title>Contact Us - NovaTrade AI</title>
-        <meta name="description" content="Get in touch with the NovaTrade AI team for support, inquiries, or partnerships." />
+        <title>Contact Us - Impulse Edge</title>
+        <meta name="description" content="Get in touch with the Impulse Edge team for support, inquiries, or partnerships." />
       </Helmet>
       <div className="min-h-screen bg-black text-white">
         <Header />

@@ -69,7 +69,7 @@ const Benefits = () => {
               Benefits
             </h2>
             <p className="text-[#ddffdc99] text-sm sm:text-base mb-8 lg:mb-8 leading-relaxed">
-              We've mastered the game. If you're still asking why, you're not ready. Frequencee doesn't sell promises—we deliver results while others are still talking
+              We've mastered the game. If you're still asking why, you're not ready. Impulse Edge doesn't sell promises—we deliver results while others are still talking
             </p>
 
             <div className="space-y-6 lg:space-y-4">
@@ -116,7 +116,7 @@ const Benefits = () => {
               </h5>
               
               <p className="text-[#ddffdc99] text-sm sm:text-base leading-relaxed">
-                Losing streaks happen, but they're the cost of bold strategies that yield bigger returns. With Frequencee, even the losses are calculated risks
+                Losing streaks happen, but they're the cost of bold strategies that yield bigger returns. With Impulse Edge, even the losses are calculated risks
               </p>
             </div>
           </div>

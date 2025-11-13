@@ -174,8 +174,8 @@ toast.success("Deposit submitted successfully");
   return (
     <>
       <Helmet>
-        <title>Deposit - NovaTrade AI</title>
-        <meta name="description" content="Deposit cryptocurrency into your NovaTrade AI account." />
+        <title>Deposit - Impulse Edge</title>
+        <meta name="description" content="Deposit cryptocurrency into your Impulse Edge account." />
       </Helmet>
 
       <div className="p-4 sm:p-6 lg:p-2 space-y-6">

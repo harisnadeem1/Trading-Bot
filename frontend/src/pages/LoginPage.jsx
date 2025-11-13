@@ -40,8 +40,8 @@ const LoginPage = () => {
   return (
     <>
       <Helmet>
-        <title>Login - NovaTrade AI</title>
-        <meta name="description" content="Login to your NovaTrade AI account." />
+        <title>Login - Impulse Edge</title>
+        <meta name="description" content="Login to your Impulse Edge account." />
       </Helmet>
       <div className="min-h-screen flex justify-center items-center p-4 bg-black">
         <motion.div

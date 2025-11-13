@@ -15,7 +15,7 @@ function LandingPage() {
   return (
     <>
       <Helmet>
-        <title>NovaTrade AI - Trade Smarter with AI-Powered Crypto Trading</title>
+        <title>Impulse Edge - Trade Smarter with AI-Powered Crypto Trading</title>
         <meta name="description" content="Automated crypto trading powered by real-time market learning. Invest in AI-driven trading strategies with proven ROI and backtested performance." />
       </Helmet>
       <div className="min-h-screen bg-black text-white overflow-x-hidden">

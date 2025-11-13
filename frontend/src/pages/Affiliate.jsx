@@ -67,8 +67,8 @@ const Affiliate = () => {
   return (
     <>
       <Helmet>
-        <title>Affiliate Program - NovaTrade AI</title>
-        <meta name="description" content="Earn commissions with the NovaTrade AI affiliate program." />
+        <title>Affiliate Program - Impulse Edge</title>
+        <meta name="description" content="Earn commissions with the Impulse Edge affiliate program." />
       </Helmet>
 
       <div className="p-4 sm:p-6 lg:p-2 space-y-6">

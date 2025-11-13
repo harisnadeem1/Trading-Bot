@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 const Footer = () => {
   const menuLinks = [
-    { name: "Explore Frequencee", href: "/" },
+    { name: "Explore Impulse Edge", href: "/" },
     { name: "Trading Bot", href: "/trading-bot" },
     { name: "VPS Servers", href: "/vps-servers" },
     { name: "Contact Us", href: "/contact" },
@@ -39,26 +39,30 @@ const Footer = () => {
         {/* Left Section */}
         <div className="space-y-6 max-w-xl">
           {/* Logo */}
-          <div className="flex items-center gap-3">
-            <div className="text-green-400">
-              <svg
-                className="w-9 h-9"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M13 2L3 14h8l-1 8 10-12h-8l1-8z"
-                  fill="currentColor"
-                  stroke="currentColor"
-                  strokeWidth="1"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+           <Link to="/" className="flex items-center gap-0 flex-shrink-0 group">
+            <svg 
+              viewBox="0 0 100 100" 
+              fill="none" 
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-9 h-9 sm:w-10 sm:h-10 transition-transform duration-300 group-hover:scale-105"
+            >
+              {/* Lightning bolt */}
+              <path 
+                d="M 55 10 L 30 55 L 50 55 L 45 90 L 75 40 L 53 40 Z" 
+                fill="#80ee64"
+                className="drop-shadow-lg group-hover:brightness-110"
+              />
+            </svg>
+            
+            <div className="flex items-center gap-1.5">
+              <span className="text-base sm:text-xl font-bold text-white tracking-tight hidden sm:inline">
+                Impulse<span className="text-[#80ee64]">Edge</span>
+              </span>
+              <span className="text-base font-bold text-white tracking-tight sm:hidden">
+                Impulse<span className="text-[#80ee64]">Edge</span>
+              </span>
             </div>
-            <span className="text-2xl font-light">NovaTrade AI</span>
-          </div>
+          </Link>
 
           {/* Tagline */}
           <div className="space-y-4">
@@ -125,7 +129,7 @@ const Footer = () => {
 
       {/* Bottom Bar */}
       <div className="flex flex-col sm:flex-row justify-center items-center text-[#707c75] text-sm px-6 sm:px-10 lg:px-12 py-4">
-        <p>© {new Date().getFullYear()} NovaTrade AI</p>
+        <p>© {new Date().getFullYear()} Impulse Edge</p>
        
       </div>
     </footer>

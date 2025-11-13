@@ -112,7 +112,7 @@ const AuthModal = () => {
                 <p className="text-sm text-gray-400">
                   {authModalView === 'login' 
                     ? 'Enter your credentials to access your account' 
-                    : 'Start your trading journey with NovaTrade AI'}
+                    : 'Start your trading journey with Impulse Edge'}
                 </p>
               </div>
 

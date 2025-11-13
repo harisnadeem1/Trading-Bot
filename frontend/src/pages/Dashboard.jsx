@@ -183,8 +183,8 @@ const Dashboard = () => {
   return (
     <>
       <Helmet>
-        <title>Dashboard - NovaTrade AI</title>
-        <meta name="description" content="Your NovaTrade AI dashboard with total balance, ROI, investments, and affiliate earnings." />
+        <title>Dashboard - Impulse Edge</title>
+        <meta name="description" content="Your Impulse Edge dashboard with total balance, ROI, investments, and affiliate earnings." />
       </Helmet>
 
       <div className="p-4 sm:p-6 lg:p-2 space-y-6">

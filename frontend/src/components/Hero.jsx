@@ -80,7 +80,7 @@ const Hero = () => {
     font-light tracking-tight mb-0 md:mb-4 leading-tight z-30
   "
           >
-            <span className="text-white font-light">Frequencee</span>
+            <span className="text-white font-light">Impulse Edge</span>
           </h1>
 
           <h2

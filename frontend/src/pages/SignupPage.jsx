@@ -34,8 +34,8 @@ const SignupPage = () => {
   return (
     <>
       <Helmet>
-        <title>Sign Up - NovaTrade AI</title>
-        <meta name="description" content="Create a new account with NovaTrade AI." />
+        <title>Sign Up - Impulse Edge</title>
+        <meta name="description" content="Create a new account with Impulse Edge." />
       </Helmet>
       <div className="min-h-screen flex justify-center items-center p-4 bg-black">
         <motion.div

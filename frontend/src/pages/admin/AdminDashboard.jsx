@@ -25,8 +25,8 @@ const AdminDashboard = () => {
   return (
     <>
       <Helmet>
-        <title>Admin Dashboard - NovaTrade AI</title>
-        <meta name="description" content="Admin overview for NovaTrade AI." />
+        <title>Admin Dashboard - Impulse Edge</title>
+        <meta name="description" content="Admin overview for Impulse Edge." />
       </Helmet>
       <div className="p-4 sm:p-6 lg:p-8">
         <motion.h1 

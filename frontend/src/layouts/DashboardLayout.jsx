@@ -42,9 +42,30 @@ const DashboardLayout = () => {
         <aside className="flex flex-col w-72 bg-[#181A20]">
           {/* Logo */}
           <div className="p-6">
-            <Link to="/">
-              <h1 className="text-2xl font-bold text-green-400 glow-green">NovaTrade AI</h1>
-            </Link>
+            <Link to="/dashboard/overview" className="flex items-center gap-0 flex-shrink-0 group">
+                          <svg
+                            viewBox="0 0 100 100"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="w-9 h-9 sm:w-10 sm:h-10 transition-transform duration-300 group-hover:scale-105"
+                          >
+                            {/* Lightning bolt */}
+                            <path
+                              d="M 55 10 L 30 55 L 50 55 L 45 90 L 75 40 L 53 40 Z"
+                              fill="#80ee64"
+                              className="drop-shadow-lg group-hover:brightness-110"
+                            />
+                          </svg>
+            
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-base sm:text-2xl font-bold text-white tracking-tight hidden sm:inline">
+                              Impulse<span className="text-[#80ee64]">Edge</span>
+                            </span>
+                            <span className="text-2xl font-bold text-white tracking-tight sm:hidden">
+                              Impulse<span className="text-[#80ee64]">Edge</span>
+                            </span>
+                          </div>
+                        </Link>
           </div>
 
           {/* Navigation */}
@@ -116,9 +137,30 @@ const DashboardLayout = () => {
         {/* Mobile Top Header */}
         <header className="bg-[#181A20] px-4 py-4 fixed top-0 left-0 right-0 z-40">
           <div className="flex items-center justify-between">
-            <Link to="/">
-              <h1 className="text-xl font-bold text-green-400 glow-green">NovaTrade AI</h1>
-            </Link>
+             <Link to="/dashboard/overview" className="flex items-center gap-0 flex-shrink-0 group">
+                          <svg
+                            viewBox="0 0 100 100"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="w-9 h-9 sm:w-10 sm:h-10 transition-transform duration-300 group-hover:scale-105"
+                          >
+                            {/* Lightning bolt */}
+                            <path
+                              d="M 55 10 L 30 55 L 50 55 L 45 90 L 75 40 L 53 40 Z"
+                              fill="#80ee64"
+                              className="drop-shadow-lg group-hover:brightness-110"
+                            />
+                          </svg>
+            
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-base sm:text-2xl font-bold text-white tracking-tight hidden sm:inline">
+                              Impulse<span className="text-[#80ee64]">Edge</span>
+                            </span>
+                            <span className="text-2xl font-bold text-white tracking-tight sm:hidden">
+                              Impulse<span className="text-[#80ee64]">Edge</span>
+                            </span>
+                          </div>
+                        </Link>
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={() => setIsMobileMenuOpen(true)}

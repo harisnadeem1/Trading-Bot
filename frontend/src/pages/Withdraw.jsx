@@ -209,8 +209,8 @@ useEffect(() => {
   return (
     <>
       <Helmet>
-        <title>Withdraw - NovaTrade AI</title>
-        <meta name="description" content="Withdraw your earnings from NovaTrade AI." />
+        <title>Withdraw - Impulse Edge</title>
+        <meta name="description" content="Withdraw your earnings from Impulse Edge." />
       </Helmet>
 
       <div className="p-4 sm:p-6 lg:p-2 space-y-6">
