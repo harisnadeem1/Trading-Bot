@@ -1,11 +1,15 @@
 // src/api/auth.js
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/api/users";
+// Always read from env (works in dev & production)
+const API_URL = import.meta.env.VITE_API_BASE_URL;
+
+// USERS endpoint
+const USERS_URL = `${API_URL}/users`;
 
 export const loginUser = async (email, password) => {
   try {
-    const res = await axios.post(`${API_URL}/login`, { email, password });
+    const res = await axios.post(`${USERS_URL}/login`, { email, password });
     return { success: true, data: res.data };
   } catch (err) {
     return {
@@ -17,11 +21,11 @@ export const loginUser = async (email, password) => {
 
 export const signupUser = async (full_name, email, password, referralCode = null) => {
   try {
-    const res = await axios.post(`${API_URL}/register`, {
+    const res = await axios.post(`${USERS_URL}/register`, {
       full_name,
       email,
       password,
-      referred_by: referralCode, // send it
+      referred_by: referralCode,
     });
     return { success: true, data: res.data };
   } catch (err) {
@@ -31,4 +35,3 @@ export const signupUser = async (full_name, email, password, referralCode = null
     };
   }
 };
-
