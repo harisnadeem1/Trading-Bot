@@ -177,7 +177,12 @@ const DashboardLayout = () => {
         </main>
 
         {/* Mobile Bottom Navigation */}
-        <nav className="fixed bottom-0 left-0 right-0 bg-[#181A20] border-t border-white/5 backdrop-blur-xl flex justify-around p-2 z-50">
+       <nav className="fixed left-0 right-0 bg-[#181A20] border-t border-white/5 backdrop-blur-xl flex justify-around p-2 z-50"
+     style={{
+        bottom: 0,
+        paddingBottom: "calc(env(safe-area-inset-bottom) + 8px)"
+     }}>
+
           {mobileNavItems.map((item) => {
             const isActive = location.pathname.startsWith(item.href);
             const Icon = item.icon;
