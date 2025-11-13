@@ -55,10 +55,10 @@ const Footer = () => {
             </svg>
             
             <div className="flex items-center gap-1.5">
-              <span className="text-base sm:text-xl font-bold text-white tracking-tight hidden sm:inline">
+              <span className="text-base sm:text-2xl font-bold text-white tracking-tight hidden sm:inline">
                 Impulse<span className="text-[#80ee64]">Edge</span>
               </span>
-              <span className="text-base font-bold text-white tracking-tight sm:hidden">
+              <span className="text-2xl font-bold text-white tracking-tight sm:hidden">
                 Impulse<span className="text-[#80ee64]">Edge</span>
               </span>
             </div>

@@ -268,7 +268,7 @@ const InputField = ({ icon: Icon, showPassword, togglePassword, ...props }) => (
     </div>
     <input 
       {...props}
-     className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-12 py-3.5 text-white text-sm placeholder:text-gray-500 focus:outline-none focus:border-green-500/50 focus:bg-white/10 transition-all"
+     className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-12 py-3.5 text-white text-base placeholder:text-gray-500 focus:outline-none focus:border-green-500/50 focus:bg-white/10 transition-all"
 
     />
     {(props.type === 'password' || (props.type === 'text' && togglePassword)) && (
