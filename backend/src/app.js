@@ -18,7 +18,27 @@ dotenv.config();
 const app = express();
 
 // Middleware
-app.use(cors({ origin: "http://localhost:3000", credentials: true }));
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow no-origin requests (e.g., Postman, curl)
+    if (!origin) return callback(null, true);
+
+    const allowedOrigins = [
+      "http://localhost:3000",
+      "http://146.70.35.241",
+      "https://146.70.35.241",
+      "http://impulseedge.com",
+      "https://impulseedge.com"
+    ];
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true
+}));
 app.use(express.json());
 
 
