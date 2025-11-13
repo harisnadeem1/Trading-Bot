@@ -120,7 +120,7 @@ const InvestmentPlans = () => {
           </h2>
 
           <p className="text-gray-400 text-sm sm:text-base leading-relaxed max-w-full">
-            From $50K to $250K+, every investment level is built to deliver results.
+            From $50 to $50K+, every investment level is built to deliver results.
             How far do you want to go?
           </p>
 

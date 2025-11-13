@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Menu, X, LogIn } from 'lucide-react';
+import { Menu, X, LogIn , Home, BadgeDollarSign, Rocket, Users, Sparkles } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
+
+
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -19,14 +21,12 @@ const Header = () => {
   }, [location, openAuthModal]);
 
   const navLinks = [
-    { name: 'Home', href: '/' },
-    { name: 'Investment Plans', href: '/#investment-plans' },
-    { name: 'How it Works', href: '/#how-it-works' },
-    { name: 'Affiliate', href: '/#affiliate' },
-
-    { name: 'Benefits', href: '/#benefits' },
-
-  ];
+  { name: "Home", href: "/", icon: Home },
+  { name: "Investment Plans", href: "/#investment-plans", icon: BadgeDollarSign },
+  { name: "How it Works", href: "/#how-it-works", icon: Rocket },
+  { name: "Affiliate", href: "/#affiliate", icon: Users },
+  { name: "Benefits", href: "/#benefits", icon: Sparkles }
+];
 
   useEffect(() => {
     const handleScroll = () => {
@@ -133,17 +133,17 @@ const Header = () => {
 
             {/* Mobile Right Side - Signup + Menu */}
             <div className="md:hidden flex items-center gap-2">
-              <Button
+              {/* <Button
                 onClick={() => openAuthModal('signup')}
                 className="bg-[#80ee64] hover:bg-[#70de54] text-black font-semibold rounded-full px-4 h-9 text-sm shadow-lg shadow-[#80ee64]/20 transition-all duration-300"
               >
                 Sign Up
-              </Button>
+              </Button> */}
               <button
                 onClick={() => setIsOpen(!isOpen)}
                 className="text-white hover:bg-white/10 p-2 rounded-full transition-colors"
               >
-                {isOpen ? <X size={24} /> : <Menu size={24} />}
+                {isOpen ? <X size={24} /> : <Menu size={30} />}
               </button>
             </div>
           </div>
@@ -151,58 +151,73 @@ const Header = () => {
       </motion.header>
 
       {/* Mobile Menu - Improved Design */}
-      <AnimatePresence>
-        {isOpen && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm"
-              onClick={() => setIsOpen(false)}
-            />
+     {/* Mobile Menu - Bottom Sheet Style */}
+<AnimatePresence>
+  {isOpen && (
+    <>
+      {/* Backdrop */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.2 }}
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60]"
+        onClick={() => setIsOpen(false)}
+      />
 
-            {/* Menu Panel */}
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
-              className="md:hidden absolute top-20 sm:top-22 left-2 right-2 sm:left-4 sm:right-4 bg-[#212525] rounded-2xl shadow-2xl border border-gray-800 overflow-hidden"
-            >
-              <nav className="flex flex-col p-2">
-                {navLinks.map((link, index) => (
-                  <Link
-                    key={link.name}
-                    to={link.href}
-                    onClick={(e) => scrollToSection(e, link.href)}
-                    className="text-white hover:bg-white/10 text-[15px] py-3.5 px-4 rounded-xl transition-all duration-200"
-                  >
-                    {link.name}
-                  </Link>
-                ))}
+      {/* Bottom Sheet */}
+      <motion.div
+        initial={{ y: "100%" }}
+        animate={{ y: 0 }}
+        exit={{ y: "100%" }}
+        transition={{ type: "spring", damping: 30, stiffness: 300 }}
+        className="fixed bottom-0 left-0 right-0 bg-[#212525] rounded-t-3xl z-[70] border-t border-white/10 pb-10"
+      >
+        {/* Handle Bar */}
+        <div className="flex justify-center pt-3 pb-2">
+          <div className="w-10 h-1 bg-gray-600 rounded-full" />
+        </div>
 
-                {/* Only show login option if not authenticated */}
-                {!isAuthenticated && (
-                  <>
-                    <div className="h-px bg-gray-800 my-2 mx-2" />
+        <nav className="flex flex-col px-4 mt-2 space-y-1">
+          {navLinks.map((link) => {
+            const Icon = link.icon;
+            return (
+              <Link
+                key={link.name}
+                to={link.href}
+                onClick={(e) => scrollToSection(e, link.href)}
+                className="flex items-center gap-3 text-white py-3 px-2 text-[16px] rounded-xl"
+              >
+                <Icon size={20} className="text-green-400" />
+                <span>{link.name}</span>
+              </Link>
+            );
+          })}
 
-                    <button
-                      onClick={() => { openAuthModal('login'); setIsOpen(false); }}
-                      className="text-white hover:bg-white/10 text-[15px] py-3.5 px-4 rounded-xl transition-all duration-200 text-left flex items-center gap-2"
-                    >
-                      <LogIn size={18} />
-                      Login
-                    </button>
-                  </>
-                )}
-              </nav>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+        
+          
+
+          {/* Sign Up Button */}
+          <button
+            onClick={() => {
+              openAuthModal("signup");
+              setIsOpen(false);
+            }}
+            className="w-full flex items-center justify-center gap-2 py-3.5 px-4 
+                       rounded-xl bg-[#80ee64] hover:bg-[#70de54] 
+                       text-black font-semibold text-[16px]
+                       transition-all shadow-lg shadow-[#80ee64]/20 mt-1"
+          >
+            <LogIn size={18} className="text-black" />
+            Sign Up
+          </button>
+        </nav>
+      </motion.div>
+    </>
+  )}
+</AnimatePresence>
+
+
     </div>
   );
 };
