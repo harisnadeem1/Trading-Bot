@@ -192,14 +192,14 @@ const AdminUsers = () => {
           </div>
         </div>
 
-        {/* Users Table */}
+        {/* Users Table - Desktop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
-          className="bg-[#0F1014] border border-white/5 rounded-xl overflow-hidden"
+          className="hidden md:block bg-[#0F1014] border border-white/5 rounded-xl overflow-hidden"
         >
-          <div className="hidden md:block overflow-x-auto">
+          <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="bg-[#1A1B1F] border-b border-white/5">
@@ -261,6 +261,67 @@ const AdminUsers = () => {
             </div>
           )}
         </motion.div>
+
+        {/* Users Cards - Mobile */}
+        <div className="md:hidden space-y-3">
+          {users.length === 0 ? (
+            <div className="bg-[#0F1014] border border-white/5 rounded-xl p-12 text-center">
+              <Users className="w-12 h-12 text-gray-600 mx-auto mb-3" />
+              <p className="text-gray-400 text-sm">
+                No users found for given criteria.
+              </p>
+            </div>
+          ) : (
+            users.map((user, index) => (
+              <motion.div
+                key={user.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 + index * 0.05 }}
+                className="bg-[#0F1014] border border-white/5 rounded-xl p-4 space-y-3"
+              >
+                {/* Header */}
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <h3 className="text-white font-semibold mb-1">
+                      {user.name}
+                    </h3>
+                    <p className="text-gray-400 text-sm break-all">
+                      {user.email}
+                    </p>
+                  </div>
+                  <div className="ml-2">{getRoleBadge(user.role)}</div>
+                </div>
+
+                {/* Divider */}
+                <div className="border-t border-white/5" />
+
+                {/* Stats Grid */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">Deposited</p>
+                    <p className="text-[#80ee64] font-semibold">
+                      ${user.totalDeposited.toLocaleString()}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">Withdrawn</p>
+                    <p className="text-orange-400 font-semibold">
+                      ${user.totalWithdrawn.toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Join Date */}
+                <div className="pt-2 border-t border-white/5">
+                  <p className="text-xs text-gray-500">
+                    Joined {new Date(user.joinDate).toLocaleDateString()}
+                  </p>
+                </div>
+              </motion.div>
+            ))
+          )}
+        </div>
 
         {/* Pagination */}
         <div className="flex items-center justify-between py-4">

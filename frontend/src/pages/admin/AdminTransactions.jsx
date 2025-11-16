@@ -34,8 +34,18 @@ const TransactionTable = ({
   pagination,
   onPageChange
 }) => {
+  const normalizeStatus = (status) => {
+    if (!status) return 'Unknown';
+    const lowerStatus = status.toLowerCase();
+    if (lowerStatus === 'approved' || lowerStatus === 'completed') return 'Completed';
+    if (lowerStatus === 'pending') return 'Pending';
+    if (lowerStatus === 'rejected') return 'Rejected';
+    return status;
+  };
+
   const getStatusConfig = (status) => {
-    switch (status) {
+    const normalized = normalizeStatus(status);
+    switch (normalized) {
       case 'Completed':
         return {
           icon: <CheckCircle2 className="w-4 h-4" />,
@@ -69,13 +79,6 @@ const TransactionTable = ({
           border: 'border-gray-500/30',
         };
     }
-  };
-
-   const normalizeStatus = (status) => {
-    if (status === 'approved') return 'Completed';
-    if (status === 'pending') return 'Pending';
-    if (status === 'rejected') return 'Rejected';
-    return status;
   };
 
   return (
@@ -116,9 +119,9 @@ const TransactionTable = ({
             </tr>
           </thead>
           <tbody>
-            
             {transactions.map((tx) => {
-              const statusConfig = getStatusConfig(normalizeStatus(tx.status));
+              const normalizedStatus = normalizeStatus(tx.status);
+              const statusConfig = getStatusConfig(tx.status);
               return (
                 <tr
                   key={tx.id}
@@ -161,7 +164,7 @@ const TransactionTable = ({
                     </div>
                   </td>
                   <td className="p-4 text-right">
-                    {normalizeStatus(tx.status) === 'Pending' && (
+                    {normalizedStatus === 'Pending' && (
                       <div className="flex gap-2 justify-end">
                         <motion.button
                           whileHover={{ scale: 1.05 }}
@@ -193,181 +196,197 @@ const TransactionTable = ({
 
       {/* Mobile Card View */}
       <div className="lg:hidden p-4 space-y-3">
-        {transactions.map((tx) => {
-          const statusConfig = getStatusConfig(tx.status);
-          return (
-            <div
-              key={tx.id}
-              className="bg-[#181A20] border border-white/5 rounded-xl p-4"
-            >
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex-1">
-                  <p className="text-sm font-semibold text-white">{tx.user}</p>
-                  <p className="text-xs text-gray-400 mt-0.5">{tx.userId}</p>
+        {transactions.length === 0 ? (
+          <div className="text-center py-12">
+            <Icon className="w-12 h-12 text-gray-600 mx-auto mb-3" />
+            <p className="text-gray-400 text-sm">No transactions found</p>
+          </div>
+        ) : (
+          transactions.map((tx) => {
+            const normalizedStatus = normalizeStatus(tx.status);
+            const statusConfig = getStatusConfig(tx.status);
+            return (
+              <div
+                key={tx.id}
+                className="bg-[#181A20] border border-white/5 rounded-xl p-4"
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex-1 min-w-0 pr-2">
+                    <p className="text-sm font-semibold text-white truncate">{tx.user}</p>
+                    <p className="text-xs text-gray-400 mt-0.5">{tx.userId}</p>
+                  </div>
+                  <div className={`flex items-center gap-1 px-2 py-1 rounded-full ${statusConfig.bg} ${statusConfig.textColor} border ${statusConfig.border} flex-shrink-0`}>
+                    {statusConfig.icon}
+                    <span className="text-xs font-medium whitespace-nowrap">{statusConfig.text}</span>
+                  </div>
                 </div>
-                <div className={`flex items-center gap-1 px-2 py-1 rounded-full ${statusConfig.bg} ${statusConfig.textColor} border ${statusConfig.border}`}>
-                  {statusConfig.icon}
-                  <span className="text-xs font-medium">{statusConfig.text}</span>
-                </div>
-              </div>
 
-              <div className="space-y-2 mb-3">
-                <div className="flex justify-between">
-                  <span className="text-xs text-gray-400">Coin</span>
-                  <span className="text-xs text-white font-semibold">{tx.coin}</span>
+                <div className="space-y-2 mb-3">
+                  <div className="flex justify-between">
+                    <span className="text-xs text-gray-400">Coin</span>
+                    <span className="text-xs text-white font-semibold">{tx.coin}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-xs text-gray-400">Amount</span>
+                    <span className="text-xs text-white font-medium">
+                      ${tx.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-xs text-gray-400">Date</span>
+                    <span className="text-xs text-gray-300">{tx.date} {tx.time}</span>
+                  </div>
+                  {type === 'Withdrawal' && tx.wallet && (
+                    <div className="pt-2 border-t border-white/5">
+                      <p className="text-[10px] text-gray-500 mb-1">Wallet Address</p>
+                      <p className="text-[10px] text-gray-400 font-mono break-all">{tx.wallet}</p>
+                    </div>
+                  )}
+                  {type === 'Deposit' && tx.txHash && (
+                    <div className="pt-2 border-t border-white/5">
+                      <p className="text-[10px] text-gray-500 mb-1">Transaction Hash</p>
+                      <p className="text-[10px] text-gray-400 font-mono break-all">{tx.txHash}</p>
+                    </div>
+                  )}
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-xs text-gray-400">Amount</span>
-                  <span className="text-xs text-white font-medium">
-                    ${tx.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-xs text-gray-400">Date</span>
-                  <span className="text-xs text-gray-300">{tx.date} {tx.time}</span>
-                </div>
-                {type === 'Withdrawal' && (
-                  <div className="pt-2 border-t border-white/5">
-                    <span className="text-[10px] text-gray-500 font-mono block truncate">{tx.wallet}</span>
+
+                {normalizedStatus === 'Pending' && (
+                  <div className="flex gap-2 pt-3 border-t border-white/5">
+                    <button
+                      onClick={() => onStatusChange(tx.id, 'Completed')}
+                      className="flex-1 flex items-center justify-center gap-1 px-3 py-2 rounded-lg bg-[#80ee64]/10 active:bg-[#80ee64]/20 text-[#80ee64] border border-[#80ee64]/30 text-xs font-medium transition-all"
+                    >
+                      <Check className="w-3 h-3" />
+                      Approve
+                    </button>
+                    <button
+                      onClick={() => onStatusChange(tx.id, 'Rejected')}
+                      className="flex-1 flex items-center justify-center gap-1 px-3 py-2 rounded-lg bg-red-500/10 active:bg-red-500/20 text-red-400 border border-red-500/30 text-xs font-medium transition-all"
+                    >
+                      <X className="w-3 h-3" />
+                      Reject
+                    </button>
                   </div>
                 )}
-                {type === 'Deposit' && (
-                  <div className="pt-2 border-t border-white/5">
-                    <span className="text-[10px] text-gray-500 font-mono block truncate">{tx.txHash}</span>
-                  </div>
-                )}
               </div>
-
-              {normalizeStatus(tx.status) === 'Pending' && (
-                <div className="flex gap-2 pt-3 border-t border-white/5">
-                  <button
-                    onClick={() => onStatusChange(tx.id, 'Completed')}
-                    className="flex-1 flex items-center justify-center gap-1 px-3 py-2 rounded-lg bg-[#80ee64]/10 active:bg-[#80ee64]/20 text-[#80ee64] border border-[#80ee64]/30 text-xs font-medium transition-all"
-                  >
-                    <Check className="w-3 h-3" />
-                    Approve
-                  </button>
-                  <button
-                    onClick={() => onStatusChange(tx.id, 'Rejected')}
-                    className="flex-1 flex items-center justify-center gap-1 px-3 py-2 rounded-lg bg-red-500/10 active:bg-red-500/20 text-red-400 border border-red-500/30 text-xs font-medium transition-all"
-                  >
-                    <X className="w-3 h-3" />
-                    Reject
-                  </button>
-                </div>
-              )}
-            </div>
-          );
-        })}
+            );
+          })
+        )}
       </div>
 
       {/* Pagination */}
-      <div className="p-4 border-t border-white/5 flex justify-between items-center">
-  <p className="text-sm text-gray-400">
-    Page {pagination.page} of {pagination.totalPages}
-  </p>
-  <div className="flex items-center gap-2">
-    <button
-      onClick={() => onPageChange(pagination.page - 1)}
-      disabled={pagination.page === 1}
-      className="p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-    >
-      <ChevronLeft className="w-4 h-4 text-gray-400" />
-    </button>
-    <span className="text-sm text-gray-400 px-3">
-      {pagination.page}/{pagination.totalPages}
-    </span>
-    <button
-      onClick={() => onPageChange(pagination.page + 1)}
-      disabled={pagination.page === pagination.totalPages}
-      className="p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-    >
-      <ChevronRight className="w-4 h-4 text-gray-400" />
-    </button>
-  </div>
-</div>
-
+      {transactions.length > 0 && (
+        <div className="p-4 border-t border-white/5 flex justify-between items-center">
+          <p className="text-xs sm:text-sm text-gray-400">
+            Page {pagination.page} of {pagination.totalPages}
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => onPageChange(pagination.page - 1)}
+              disabled={pagination.page === 1}
+              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ChevronLeft className="w-4 h-4 text-gray-400" />
+            </button>
+            <span className="text-xs sm:text-sm text-gray-400 px-2 sm:px-3">
+              {pagination.page}/{pagination.totalPages}
+            </span>
+            <button
+              onClick={() => onPageChange(pagination.page + 1)}
+              disabled={pagination.page === pagination.totalPages}
+              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ChevronRight className="w-4 h-4 text-gray-400" />
+            </button>
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 };
 
 const AdminTransactions = () => {
- const [withdrawals, setWithdrawals] = useState([]);
-const [deposits, setDeposits] = useState([]);
+  const [withdrawals, setWithdrawals] = useState([]);
+  const [deposits, setDeposits] = useState([]);
 
-const [withdrawPage, setWithdrawPage] = useState(1);
-const [depositPage, setDepositPage] = useState(1);
+  const [withdrawPage, setWithdrawPage] = useState(1);
+  const [depositPage, setDepositPage] = useState(1);
 
-const [withdrawPagination, setWithdrawPagination] = useState({ totalPages: 1 });
-const [depositPagination, setDepositPagination] = useState({ totalPages: 1 });
+  const [withdrawPagination, setWithdrawPagination] = useState({ page: 1, totalPages: 1 });
+  const [depositPagination, setDepositPagination] = useState({ page: 1, totalPages: 1 });
 
-const { token } = useAuthStore();
+  const { token } = useAuthStore();
 
+  useEffect(() => {
+    fetchTransactions('deposit', depositPage, setDeposits, setDepositPagination);
+  }, [depositPage]);
 
-useEffect(() => {
-  fetchTransactions('deposit', depositPage, setDeposits, setDepositPagination);
-}, [depositPage]);
+  useEffect(() => {
+    fetchTransactions('withdraw', withdrawPage, setWithdrawals, setWithdrawPagination);
+  }, [withdrawPage]);
 
-useEffect(() => {
-  fetchTransactions('withdraw', withdrawPage, setWithdrawals, setWithdrawPagination);
-}, [withdrawPage]);
-
-const fetchTransactions = async (type, page, setData, setPagination) => {
-  try {
-    const res = await axios.get(`${API_BASE}/admin/transactions`, {
-      headers: { Authorization: `Bearer ${token}` },
-      params: { type, page, limit: 10 },
-    });
-    if (res.data.success) {
-      setData(res.data.data);
-      setPagination(res.data.pagination);
+  const fetchTransactions = async (type, page, setData, setPagination) => {
+    try {
+      const res = await axios.get(`${API_BASE}/admin/transactions`, {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { type, page, limit: 10 },
+      });
+      if (res.data.success) {
+        setData(res.data.data);
+        setPagination({ ...res.data.pagination, page });
+      }
+    } catch (err) {
+      console.error(`❌ Failed to fetch ${type} transactions:`, err);
     }
-  } catch (err) {
-    console.error(`❌ Failed to fetch ${type} transactions:`, err);
-  }
-};
+  };
 
+  const handleWithdrawalStatusChange = async (id, newStatus) => {
+    try {
+      const res = await axios.patch(
+        `${API_BASE}/admin/transactions/${id}/status`,
+        { status: newStatus === 'Completed' ? 'approved' : 'rejected' },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-  
-const handleWithdrawalStatusChange = async (id, newStatus) => {
-  try {
-    const res = await axios.patch(
-      `${API_BASE}/admin/transactions/${id}/status`,
-      { status: newStatus === 'Completed' ? 'approved' : 'rejected' },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-
-    if (res.data.success) {
-      // Re-fetch after update
-      fetchTransactions('withdraw', withdrawPage, setWithdrawals, setWithdrawPagination);
+      if (res.data.success) {
+        // Re-fetch after update
+        fetchTransactions('withdraw', withdrawPage, setWithdrawals, setWithdrawPagination);
+      }
+    } catch (err) {
+      console.error("❌ Failed to update withdrawal:", err);
     }
-  } catch (err) {
-    console.error("❌ Failed to update withdrawal:", err);
-  }
-};
+  };
 
-const handleDepositStatusChange = async (id, newStatus) => {
-  try {
-    const res = await axios.patch(
-      `${API_BASE}/admin/transactions/${id}/status`,
-      { status: newStatus === 'Completed' ? 'approved' : 'rejected' },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+  const handleDepositStatusChange = async (id, newStatus) => {
+    try {
+      const res = await axios.patch(
+        `${API_BASE}/admin/transactions/${id}/status`,
+        { status: newStatus === 'Completed' ? 'approved' : 'rejected' },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-    if (res.data.success) {
-      fetchTransactions('deposit', depositPage, setDeposits, setDepositPagination);
+      if (res.data.success) {
+        fetchTransactions('deposit', depositPage, setDeposits, setDepositPagination);
+      }
+    } catch (err) {
+      console.error("❌ Failed to update deposit:", err);
     }
-  } catch (err) {
-    console.error("❌ Failed to update deposit:", err);
-  }
-};
-
+  };
 
   // Calculate stats
   const totalDeposits = deposits.reduce((sum, d) => sum + Number(d.amount || 0), 0);
-const totalWithdrawals = withdrawals.reduce((sum, w) => sum + Number(w.amount || 0), 0);
-  const pendingWithdrawals = withdrawals.filter(w => w.status === 'Pending').length;
-  const pendingDeposits = deposits.filter(d => d.status === 'Pending').length;
+  const totalWithdrawals = withdrawals.reduce((sum, w) => sum + Number(w.amount || 0), 0);
+  
+  // Normalize status for counting
+  const normalizeForCount = (status) => {
+    if (!status) return '';
+    const lower = status.toLowerCase();
+    if (lower === 'pending') return 'pending';
+    return '';
+  };
+  
+  const pendingWithdrawals = withdrawals.filter(w => normalizeForCount(w.status) === 'pending').length;
+  const pendingDeposits = deposits.filter(d => normalizeForCount(d.status) === 'pending').length;
 
   return (
     <>
@@ -443,26 +462,25 @@ const totalWithdrawals = withdrawals.reduce((sum, w) => sum + Number(w.amount ||
         </div>
 
         {/* Tables */}
-       <TransactionTable
-  title="Deposits"
-  transactions={deposits}
-  onStatusChange={handleDepositStatusChange}
-  type="Deposit"
-  icon={ArrowDownToLine}
-  pagination={depositPagination}
-  onPageChange={setDepositPage}
-/>
+        <TransactionTable
+          title="Deposits"
+          transactions={deposits}
+          onStatusChange={handleDepositStatusChange}
+          type="Deposit"
+          icon={ArrowDownToLine}
+          pagination={depositPagination}
+          onPageChange={setDepositPage}
+        />
 
-<TransactionTable
-  title="Withdrawals"
-  transactions={withdrawals}
-  onStatusChange={handleWithdrawalStatusChange}
-  type="Withdrawal"
-  icon={ArrowUpFromLine}
-  pagination={withdrawPagination}
-  onPageChange={setWithdrawPage}
-/>
-
+        <TransactionTable
+          title="Withdrawals"
+          transactions={withdrawals}
+          onStatusChange={handleWithdrawalStatusChange}
+          type="Withdrawal"
+          icon={ArrowUpFromLine}
+          pagination={withdrawPagination}
+          onPageChange={setWithdrawPage}
+        />
       </div>
     </>
   );
