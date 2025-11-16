@@ -1,7 +1,6 @@
 import pool from "../config/db.js";
 import cron from "node-cron";
 
-// Helper: random ROI generator
 const generateDailyRoiArray = (total, days) => {
   const numLossDays = Math.min(3, Math.floor(days / 10));
   const lossDays = new Set();

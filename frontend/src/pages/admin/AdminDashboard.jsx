@@ -1,100 +1,304 @@
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { Helmet } from "react-helmet";
+import { motion } from "framer-motion";
+import {
+  Users,
+  DollarSign,
+  Package,
+  Banknote,
+  TrendingUp,
+  TrendingDown,
+  ArrowUpRight,
+  ArrowDownRight,
+} from "lucide-react";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+  BarChart,
+  Bar,
+  AreaChart,
+  Area,
+} from "recharts";
 
-import React from 'react';
-import { Helmet } from 'react-helmet';
-import { motion } from 'framer-motion';
-import { Users, DollarSign, Package, Banknote } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, BarChart, Bar } from 'recharts';
-
-const depositData = [
-  { name: 'Mon', Deposits: 4000 }, { name: 'Tue', Deposits: 3000 }, { name: 'Wed', Deposits: 2000 },
-  { name: 'Thu', Deposits: 2780 }, { name: 'Fri', Deposits: 1890 }, { name: 'Sat', Deposits: 2390 }, { name: 'Sun', Deposits: 3490 },
-];
-const withdrawalData = [
-  { name: 'Mon', Withdrawals: 2400 }, { name: 'Tue', Withdrawals: 1398 }, { name: 'Wed', Withdrawals: 9800 },
-  { name: 'Thu', Withdrawals: 3908 }, { name: 'Fri', Withdrawals: 4800 }, { name: 'Sat', Withdrawals: 3800 }, { name: 'Sun', Withdrawals: 4300 },
-];
+const API = import.meta.env.VITE_API_BASE_URL; // example: http://localhost:5000
 
 const AdminDashboard = () => {
+  const [summary, setSummary] = useState(null);
+  const [quickStats, setQuickStats] = useState(null);
+
+  const [depositPeriod, setDepositPeriod] = useState("1w");
+  const [withdrawalPeriod, setWithdrawalPeriod] = useState("1w");
+  const [revenuePeriod, setRevenuePeriod] = useState("1m");
+
+  const [depositData, setDepositData] = useState([]);
+  const [withdrawalData, setWithdrawalData] = useState([]);
+  const [revenueData, setRevenueData] = useState([]);
+
+  const token = localStorage.getItem("token");
+
+  // Fetch Summary
+  useEffect(() => {
+  async function loadSummary() {
+    try {
+      const res = await axios.get(`${API}/admin/dashboard/summary`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setSummary(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+  loadSummary();
+}, []);
+
+
+  // Fetch Quick Stats
+ useEffect(() => {
+  async function loadQuickStats() {
+    try {
+      const res = await axios.get(`${API}/admin/dashboard/quick-stats`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setQuickStats(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+  loadQuickStats();
+}, []);
+
+  // Fetch Charts
+  const fetchChart = async (metric, period, setter) => {
+    try {
+      const res = await axios.get(
+        `${API}/admin/dashboard/chart?metric=${metric}&period=${period}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      const formatted = res.data.map((item) => ({
+        name: item.label,
+        value: Number(item.value),
+      }));
+
+      setter(formatted);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+  async function load() {
+    await fetchChart("deposits", depositPeriod, setDepositData);
+  }
+  load();
+}, [depositPeriod]);
+
+useEffect(() => {
+  async function load() {
+    await fetchChart("withdrawals", withdrawalPeriod, setWithdrawalData);
+  }
+  load();
+}, [withdrawalPeriod]);
+
+useEffect(() => {
+  async function load() {
+    await fetchChart("revenue", revenuePeriod, setRevenueData);
+  }
+  load();
+}, [revenuePeriod]);
+
+  // UI Toggle Component
+  const TimeToggle = ({ selected, onChange }) => {
+    const periods = [
+      { value: "1w", label: "1W" },
+      { value: "1m", label: "1M" },
+      { value: "3m", label: "3M" },
+    ];
+
+    return (
+      <div className="inline-flex bg-[#1A1B1F] rounded-lg p-1 border border-white/5">
+        {periods.map((period) => (
+          <button
+            key={period.value}
+            onClick={() => onChange(period.value)}
+            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+              selected === period.value ? "bg-[#80ee64] text-black" : "text-gray-400 hover:text-white"
+            }`}
+          >
+            {period.label}
+          </button>
+        ))}
+      </div>
+    );
+  };
+
+  if (!summary || !quickStats) {
+    return <div className="text-center text-gray-400 p-10">Loading dashboard...</div>;
+  }
+
   const stats = [
-    { title: 'Total Users', value: '1,254', icon: Users, color: 'text-purple-400' },
-    { title: 'Total Deposits', value: '$1.2M', icon: DollarSign, color: 'text-green-400' },
-    { title: 'Total Withdrawals', value: '$450K', icon: Banknote, color: 'text-orange-400' },
-    { title: 'Active Investments', value: '876', icon: Package, color: 'text-yellow-400' },
+    {
+      title: "Total Users",
+      value: summary.totalUsers.toLocaleString(),
+      change: "+12.5%",
+      isPositive: true,
+      icon: Users,
+    },
+    {
+      title: "Total Deposits",
+      value: `$${summary.totalDeposits.toLocaleString()}`,
+      change: "+8.3%",
+      isPositive: true,
+      icon: DollarSign,
+    },
+    {
+      title: "Total Withdrawals",
+      value: `$${summary.totalWithdrawals.toLocaleString()}`,
+      change: "+5.2%",
+      isPositive: true,
+      icon: Banknote,
+    },
+    {
+      title: "Active Investments",
+      value: summary.activeInvestments.toLocaleString(),
+      change: "-2.4%",
+      isPositive: false,
+      icon: Package,
+    },
   ];
 
   return (
     <>
       <Helmet>
         <title>Admin Dashboard - Impulse Edge</title>
-        <meta name="description" content="Admin overview for Impulse Edge." />
       </Helmet>
-      <div className="p-4 sm:p-6 lg:p-8">
-        <motion.h1 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-3xl font-bold mb-8 text-blue-400 glow-blue"
-        >
-          Admin Overview
-        </motion.h1>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {stats.map((stat, index) => (
+      <div className="p-4 space-y-6">
+        <h1 className="text-3xl font-bold text-white">Admin Overview</h1>
+        <p className="text-gray-400">Monitor your platform’s performance</p>
+
+        {/* Summary Stats */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {stats.map((stat, i) => (
             <motion.div
-              key={stat.title}
-              initial={{ opacity: 0, y: 30 }}
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="bg-gray-900/50 border border-blue-500/20 rounded-xl p-6 hover:border-blue-500/40 transition-all duration-300 card-glow-blue"
+              transition={{ delay: i * 0.1 }}
+              className="bg-[#0F1014] border border-white/5 rounded-xl p-5"
             >
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-sm text-gray-400">{stat.title}</p>
-                <stat.icon className={`w-6 h-6 ${stat.color}`} />
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm text-gray-400">{stat.title}</h3>
+                <div className="w-10 h-10 bg-[#80ee64]/10 flex items-center justify-center rounded-xl">
+                  <stat.icon className="w-5 h-5 text-[#80ee64]" />
+                </div>
               </div>
-              <p className="text-3xl font-bold">{stat.value}</p>
+
+              <p className="text-2xl font-bold text-white">{stat.value}</p>
+
+              <div className="flex items-center gap-1">
+                {stat.isPositive ? (
+                  <ArrowUpRight className="w-4 h-4 text-[#80ee64]" />
+                ) : (
+                  <ArrowDownRight className="w-4 h-4 text-red-400" />
+                )}
+                <span className={`text-sm ${stat.isPositive ? "text-[#80ee64]" : "text-red-400"}`}>
+                  {stat.change}
+                </span>
+                <span className="text-xs text-gray-500">vs last week</span>
+              </div>
             </motion.div>
           ))}
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8">
-           <motion.div 
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="bg-gray-900/50 border border-blue-500/20 rounded-xl p-6 card-glow-blue"
-          >
-            <h2 className="text-xl font-bold mb-4">Weekly Deposits</h2>
-            <div style={{ width: '100%', height: 300 }}>
-              <ResponsiveContainer>
-                <BarChart data={depositData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(59, 130, 246, 0.1)" />
-                  <XAxis dataKey="name" stroke="#888" />
-                  <YAxis stroke="#888" />
-                  <Tooltip contentStyle={{ backgroundColor: 'rgba(20, 20, 20, 0.8)', borderColor: 'rgba(59, 130, 246, 0.5)' }} />
-                  <Bar dataKey="Deposits" fill="#3b82f6" />
-                </BarChart>
-              </ResponsiveContainer>
+        {/* Deposits Chart */}
+        <motion.div className="bg-[#0F1014] border border-white/5 rounded-2xl p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-xl font-bold text-white">Deposits</h2>
             </div>
-          </motion.div>
-           <motion.div 
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
-            className="bg-gray-900/50 border border-blue-500/20 rounded-xl p-6 card-glow-blue"
-          >
-            <h2 className="text-xl font-bold mb-4">Weekly Withdrawals</h2>
-            <div style={{ width: '100%', height: 300 }}>
-              <ResponsiveContainer>
-                <LineChart data={withdrawalData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(239, 68, 68, 0.1)" />
-                  <XAxis dataKey="name" stroke="#888" />
-                  <YAxis stroke="#888" />
-                  <Tooltip contentStyle={{ backgroundColor: 'rgba(20, 20, 20, 0.8)', borderColor: 'rgba(239, 68, 68, 0.5)' }} />
-                  <Line type="monotone" dataKey="Withdrawals" stroke="#ef4444" strokeWidth={2} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </motion.div>
+
+            <TimeToggle selected={depositPeriod} onChange={setDepositPeriod} />
+          </div>
+
+          <div style={{ width: "100%", height: 280, minHeight: "280px" }}>
+            <ResponsiveContainer>
+              <BarChart data={depositData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                <XAxis dataKey="name" stroke="#6B7280" />
+                <YAxis stroke="#6B7280" tickFormatter={(v) => `$${v / 1000}k`} />
+                <Tooltip />
+                <Bar dataKey="value" fill="#80ee64" radius={[8, 8, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </motion.div>
+
+        {/* Withdrawals Chart */}
+        <motion.div className="bg-[#0F1014] border border-white/5 rounded-2xl p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-white">Withdrawals</h2>
+            <TimeToggle selected={withdrawalPeriod} onChange={setWithdrawalPeriod} />
+          </div>
+
+          <div style={{ width: "100%", height: 280, minHeight: "280px" }}>
+            <ResponsiveContainer>
+              <LineChart data={withdrawalData}>
+                <XAxis dataKey="name" stroke="#6B7280" />
+                <YAxis stroke="#6B7280" tickFormatter={(v) => `$${v / 1000}k`} />
+                <Tooltip />
+                <Line dataKey="value" stroke="#ef4444" strokeWidth={2} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </motion.div>
+
+        {/* Revenue Chart */}
+        <motion.div className="bg-[#0F1014] border border-white/5 rounded-2xl p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-white">Revenue Overview</h2>
+            <TimeToggle selected={revenuePeriod} onChange={setRevenuePeriod} />
+          </div>
+
+          <div style={{ width: "100%", height: 300, minHeight: "300px" }}>
+            <ResponsiveContainer>
+              <AreaChart data={revenueData}>
+                <XAxis dataKey="name" stroke="#6B7280" />
+                <YAxis stroke="#6B7280" tickFormatter={(v) => `$${v / 1000}k`} />
+                <Tooltip />
+                <Area
+                  type="monotone"
+                  dataKey="value"
+                  stroke="#80ee64"
+                  fill="#80ee6455"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </motion.div>
+
+        {/* Quick Stats */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="bg-[#0F1014] p-5 rounded-xl border border-white/5">
+            <h3 className="text-gray-400">Pending Deposits</h3>
+            <p className="text-2xl text-white font-bold">{quickStats.pendingDeposits}</p>
+          </div>
+
+          <div className="bg-[#0F1014] p-5 rounded-xl border border-white/5">
+            <h3 className="text-gray-400">Pending Withdrawals</h3>
+            <p className="text-2xl text-white font-bold">{quickStats.pendingWithdrawals}</p>
+          </div>
+
+          <div className="bg-[#0F1014] p-5 rounded-xl border border-white/5">
+            <h3 className="text-gray-400">New Users Today</h3>
+            <p className="text-2xl text-white font-bold">{quickStats.newUsersToday}</p>
+          </div>
         </div>
       </div>
     </>
