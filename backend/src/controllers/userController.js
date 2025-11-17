@@ -13,7 +13,8 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const normalizedPassword = password.toLowerCase();
+const hashedPassword = await bcrypt.hash(normalizedPassword, 10);
     const referralCode = `REF${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
 
     const newUser = await pool.query(
@@ -43,7 +44,8 @@ export const loginUser = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    const validPass = await bcrypt.compare(password, user.rows[0].password_hash);
+    const normalizedPassword = password.toLowerCase();
+const validPass = await bcrypt.compare(normalizedPassword, user.rows[0].password_hash);
     if (!validPass) {
       return res.status(400).json({ message: "Invalid credentials" });
     }

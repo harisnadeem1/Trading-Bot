@@ -1,12 +1,17 @@
 import pool from "../config/db.js";
 
+/* ============================================================
+   📌 FETCH ALL TRANSACTIONS (ADMIN TABLE)
+============================================================ */
 export const getAllTransactions = async (req, res) => {
   try {
     const { type = "deposit", page = 1, limit = 10 } = req.query;
     const offset = (page - 1) * limit;
 
     if (!["deposit", "withdraw"].includes(type)) {
-      return res.status(400).json({ success: false, message: "Invalid transaction type" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid transaction type" });
     }
 
     const query = `
@@ -15,9 +20,9 @@ export const getAllTransactions = async (req, res) => {
         u.email AS user_email,
         CONCAT('USR-', LPAD(u.id::text, 3, '0')) AS user_id,
         c.symbol AS currency_symbol,
-        c.name AS currency_name,
         cn.network_name,
         t.amount,
+        t.usd_value,
         t.wallet_address,
         t.tx_hash,
         t.status,
@@ -44,13 +49,16 @@ export const getAllTransactions = async (req, res) => {
       user: t.user_email,
       userId: t.user_id,
       coin: t.currency_symbol || "N/A",
-      amount: Number(t.amount),
+      amount: Number(t.usd_value), // ALWAYS show stored USD
       wallet: t.wallet_address,
       txHash: t.tx_hash,
       status: t.status,
       type: t.tx_type,
       date: new Date(t.created_at).toLocaleDateString(),
-      time: new Date(t.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      time: new Date(t.created_at).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
     }));
 
     res.json({
@@ -65,80 +73,106 @@ export const getAllTransactions = async (req, res) => {
     });
   } catch (err) {
     console.error("❌ Error fetching admin transactions:", err);
-    res.status(500).json({ success: false, message: "Internal server error" });
+    res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
   }
 };
 
+/* ============================================================
+   📌 UPDATE TRANSACTION STATUS (APPROVE / REJECT)
+============================================================ */
 export const updateTransactionStatus = async (req, res) => {
   const client = await pool.connect();
+
   try {
     const { id } = req.params;
     const { status } = req.body;
 
     if (!["approved", "rejected"].includes(status)) {
-      return res.status(400).json({ success: false, message: "Invalid status value" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid status value" });
     }
 
     // Fetch the transaction
-    const { rows } = await client.query(`SELECT * FROM transactions WHERE id = $1`, [id]);
-    if (rows.length === 0) {
-      return res.status(404).json({ success: false, message: "Transaction not found" });
+    const { rows } = await client.query(
+      `SELECT * FROM transactions WHERE id = $1`,
+      [id]
+    );
+    if (!rows.length) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Transaction not found" });
     }
 
     const transaction = rows[0];
 
-    // Begin SQL transaction for atomicity
     await client.query("BEGIN");
 
-    // Update transaction status
-    await client.query(`UPDATE transactions SET status = $1 WHERE id = $2`, [status, id]);
+    // Update status
+    await client.query(
+      `UPDATE transactions SET status = $1 WHERE id = $2`,
+      [status, id]
+    );
 
-    // ✅ Deposit approval logic
+    /* ============================================================
+       ✅ DEPOSIT APPROVAL → CREDIT USER + REFERRALS
+    ============================================================= */
     if (transaction.tx_type === "deposit" && status === "approved") {
-      // 1️⃣ Credit the depositor
+      console.log("🟢 Deposit Approval Triggered.");
+
+      // ⭐ Use STORED usd_value
+      const usdValue = Number(transaction.usd_value);
+
+      // 1️⃣ Credit user wallet
       await client.query(
         `UPDATE users SET 
             balance = balance + $1,
             total_deposits = total_deposits + $1
          WHERE id = $2`,
-        [transaction.amount, transaction.user_id]
+        [usdValue, transaction.user_id]
       );
 
-      // 2️⃣ Build referrer chain (up to 5 levels)
+      /* ============================================================
+         🔥 REFERRAL COMMISSIONS
+      ============================================================= */
       const ancestors = [];
       let currentUserId = transaction.user_id;
 
       for (let level = 1; level <= 5; level++) {
-        const refQuery = `
-          SELECT u2.id AS referrer_id
-          FROM users u1
-          JOIN users u2 ON u1.referred_by = u2.referral_code
-          WHERE u1.id = $1
-        `;
-        const refResult = await client.query(refQuery, [currentUserId]);
-        if (refResult.rows.length === 0) break;
+        const refResult = await client.query(
+          `SELECT u2.id AS referrer_id
+           FROM users u1
+           JOIN users u2 ON u1.referred_by = u2.referral_code
+           WHERE u1.id = $1`,
+          [currentUserId]
+        );
+
+        if (!refResult.rows.length) break;
 
         const referrerId = refResult.rows[0].referrer_id;
         ancestors.push({ level, referrerId });
-        currentUserId = referrerId; // move up the chain
+
+        currentUserId = referrerId;
       }
 
-      // 3️⃣ For each ancestor, give commission
+      // Pay commissions
       for (const ancestor of ancestors) {
         const { level, referrerId } = ancestor;
 
-        // Fetch level percentage
         const levelRes = await client.query(
           `SELECT commission_percent FROM referral_levels 
            WHERE level = $1 AND commission_type = 'direct'`,
           [level]
         );
-        if (levelRes.rows.length === 0) continue;
+
+        if (!levelRes.rows.length) continue;
 
         const percent = parseFloat(levelRes.rows[0].commission_percent);
-        const commission = (transaction.amount * percent) / 100;
+        const commission = (usdValue * percent) / 100;
 
-        // Credit referrer
+        // Update referral wallet
         await client.query(
           `UPDATE users 
              SET balance = balance + $1,
@@ -147,14 +181,15 @@ export const updateTransactionStatus = async (req, res) => {
           [commission, referrerId]
         );
 
-        // 🔥 NEW: Store related_user_id = the depositor
+        // Log transaction
         await client.query(
-          `INSERT INTO transactions (user_id, related_user_id, tx_type, amount, status)
+          `INSERT INTO transactions 
+           (user_id, related_user_id, tx_type, amount, status)
            VALUES ($1, $2, 'referral_direct', $3, 'approved')`,
           [referrerId, transaction.user_id, commission]
         );
 
-        // Update or insert referral record
+        // Update referral table
         await client.query(
           `INSERT INTO referrals (referrer_id, referred_user_id, commission_earned)
            VALUES ($1, $2, $3)
@@ -165,7 +200,9 @@ export const updateTransactionStatus = async (req, res) => {
       }
     }
 
-    // ✅ Withdrawal rejection → refund user
+    /* ============================================================
+       🔴 WITHDRAWAL REJECTION → REFUND
+    ============================================================= */
     if (transaction.tx_type === "withdraw" && status === "rejected") {
       await client.query(
         `UPDATE users SET balance = balance + $1 WHERE id = $2`,
@@ -174,13 +211,17 @@ export const updateTransactionStatus = async (req, res) => {
     }
 
     await client.query("COMMIT");
+
     res.json({ success: true, message: `Transaction ${status} successfully` });
   } catch (err) {
     await client.query("ROLLBACK");
-    console.error("❌ Error updating transaction status:", err);
-    res.status(500).json({ success: false, message: "Internal server error" });
+    console.error("❌ ERROR:", err);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: err.message,
+    });
   } finally {
     client.release();
   }
 };
-

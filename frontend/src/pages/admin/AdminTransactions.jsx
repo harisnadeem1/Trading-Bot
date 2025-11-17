@@ -138,7 +138,7 @@ const TransactionTable = ({
                   </td>
                   <td className="p-4">
                     <span className="text-sm font-medium text-white">
-                      ${tx.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      {tx.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </span>
                   </td>
                   <td className="p-4">
@@ -374,8 +374,13 @@ const AdminTransactions = () => {
   };
 
   // Calculate stats
-  const totalDeposits = deposits.reduce((sum, d) => sum + Number(d.amount || 0), 0);
-  const totalWithdrawals = withdrawals.reduce((sum, w) => sum + Number(w.amount || 0), 0);
+ const totalDeposits = deposits
+  .filter(d => d.status.toLowerCase() === "approved")
+  .reduce((sum, d) => sum + Number(d.amount || 0), 0);
+
+const totalWithdrawals = withdrawals
+  .filter(w => w.status.toLowerCase() === "approved")
+  .reduce((sum, w) => sum + Number(w.amount || 0), 0);
   
   // Normalize status for counting
   const normalizeForCount = (status) => {

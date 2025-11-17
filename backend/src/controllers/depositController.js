@@ -1,4 +1,5 @@
 import pool from "../config/db.js"; // your pg connection pool
+import axios from "axios";
 
 // 1️⃣ Get all active wallet addresses
 export const getDepositWallets = async (req, res) => {
@@ -29,43 +30,73 @@ export const createDeposit = async (req, res) => {
   const { currency_symbol, network, amount, tx_hash } = req.body;
 
   if (!currency_symbol || !network || !amount || !tx_hash) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Missing required fields" });
+    return res.status(400).json({ success: false, message: "Missing fields" });
   }
 
   try {
+    // 1) Get currency_network_id
     const { rows } = await pool.query(
-      `
-      SELECT cn.id 
-      FROM currency_networks cn
-      JOIN currencies c ON cn.currency_id = c.id
-      WHERE c.symbol = $1 AND cn.network_name = $2
-    `,
+      `SELECT cn.id, c.symbol
+       FROM currency_networks cn
+       JOIN currencies c ON cn.currency_id = c.id
+       WHERE c.symbol = $1 AND cn.network_name = $2`,
       [currency_symbol, network]
     );
 
-    if (!rows.length)
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid currency or network" });
+    if (!rows.length) {
+      return res.status(400).json({ success: false, message: "Invalid currency or network" });
+    }
 
     const currencyNetworkId = rows[0].id;
+    const coinSymbol = rows[0].symbol;
 
-    await pool.query(
-      `
-      INSERT INTO transactions (user_id, currency_network_id, amount, tx_type, status, tx_hash)
-      VALUES ($1, $2, $3, 'deposit', 'pending', $4)
-    `,
-      [userId, currencyNetworkId, amount, tx_hash]
+    // 2) Map to Coingecko
+    const COINGECKO_IDS = {
+      BTC: "bitcoin",
+      ETH: "ethereum",
+      USDT: "tether",
+      USDC: "usd-coin",
+      BNB: "binancecoin",
+    };
+
+    const coingeckoId = COINGECKO_IDS[coinSymbol];
+    if (!coingeckoId) {
+      return res.status(400).json({ success: false, message: "Unsupported currency" });
+    }
+
+    // 3) Fetch USD price
+    const priceRes = await axios.get(
+      "https://api.coingecko.com/api/v3/simple/price",
+      { params: { ids: coingeckoId, vs_currencies: "usd" } }
     );
 
-    res.json({ success: true, message: "Deposit submitted successfully" });
+    const usdPrice = priceRes.data[coingeckoId]?.usd;
+    if (!usdPrice) {
+      return res.status(500).json({ success: false, message: "Failed to get price" });
+    }
+
+    // 4) Convert crypto → USD
+    const usdValue = Number(amount) * Number(usdPrice);
+
+    // 5) Insert deposit with USD VALUE LOCKED IN
+    await pool.query(
+      `INSERT INTO transactions (user_id, currency_network_id, amount, usd_value, tx_type, status, tx_hash)
+       VALUES ($1, $2, $3, $4, 'deposit', 'pending', $5)`,
+      [userId, currencyNetworkId, amount, usdValue, tx_hash]
+    );
+
+    return res.json({
+      success: true,
+      message: "Deposit created successfully",
+      usd_value: usdValue.toFixed(2),
+    });
+
   } catch (err) {
     console.error("Error creating deposit:", err);
-    res.status(500).json({ success: false, message: "Server error" });
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
 
 // 3️⃣ Fetch user's deposit history
 export const getDepositHistory = async (req, res) => {
