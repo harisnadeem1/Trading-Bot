@@ -59,38 +59,60 @@ export const createWithdrawal = async (req, res) => {
     const client = await pool.connect();
     await client.query("BEGIN");
 
-    // 1️⃣ Validate user balance
+    // 1️⃣ Validate balance
     const { rows: userRes } = await client.query(
       `SELECT balance FROM users WHERE id = $1`,
       [userId]
     );
     const balance = Number(userRes[0]?.balance || 0);
 
-    if (withdrawAmount < 50)
-      throw new Error("Minimum withdrawal is $50");
-    if (withdrawAmount > balance)
-      throw new Error("Insufficient balance");
+    if (withdrawAmount < 50) throw new Error("Minimum withdrawal is $50");
+    if (withdrawAmount > balance) throw new Error("Insufficient balance");
 
-    // 2️⃣ Create withdrawal record
+    // 2️⃣ Fetch currency + network info for USD & symbol
+    const { rows: info } = await client.query(
+      `SELECT cn.id AS network_id, cn.network_name, c.symbol
+       FROM currency_networks cn
+       JOIN currencies c ON c.id = cn.currency_id
+       WHERE cn.id = $1`,
+      [currencyNetworkId]
+    );
+
+    if (!info.length) throw new Error("Invalid network selected");
+
+    const currencySymbol = info[0].symbol;
+    const networkName = info[0].network_name;
+
+    // 3️⃣ Insert FULL withdrawal record
     await client.query(
-      `INSERT INTO transactions (user_id, currency_network_id, tx_type, amount, wallet_address, status)
-       VALUES ($1, $2, 'withdraw', $3, $4, 'pending')`,
+      `INSERT INTO transactions
+       (user_id, currency_network_id, tx_type, amount, usd_value, wallet_address, status)
+       VALUES ($1, $2, 'withdraw', $3, $3, $4, 'pending')`,
       [userId, currencyNetworkId, withdrawAmount, walletAddress]
     );
 
-    // 3️⃣ Deduct balance immediately (optional, safer)
+    // 4️⃣ Deduct balance instantly
     await client.query(
-      `UPDATE users SET balance = balance - $1, total_withdrawals = total_withdrawals + $1 WHERE id = $2`,
+      `UPDATE users 
+       SET balance = balance - $1,
+           total_withdrawals = total_withdrawals + $1
+       WHERE id = $2`,
       [withdrawAmount, userId]
     );
 
     await client.query("COMMIT");
-    res.json({ success: true, message: "Withdrawal request submitted successfully" });
+
+    res.json({
+      success: true,
+      message: "Withdrawal request submitted successfully"
+    });
+
   } catch (err) {
     console.error("❌ [WITHDRAW REQUEST ERROR]:", err.message);
     res.status(400).json({ success: false, message: err.message });
   }
 };
+
 
 
 

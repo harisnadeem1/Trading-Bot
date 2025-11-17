@@ -31,6 +31,8 @@ export const getAffiliateDashboard = async (req, res) => {
       AND status = 'approved'
     `, [userId]);
 
+    
+
     // 4️⃣ Referral details — commissions rolled up under level-1 users
     const referralListRes = await client.query(`
       WITH RECURSIVE referral_tree AS (
@@ -61,11 +63,11 @@ export const getAffiliateDashboard = async (req, res) => {
         TO_CHAR(tl.created_at, 'YYYY-MM-DD') AS join_date,
         TO_CHAR(tl.created_at, 'HH24:MI') AS join_time,
         COALESCE((
-          SELECT SUM(t.amount)
-          FROM transactions t
-          WHERE t.user_id = tl.user_id
-            AND t.tx_type = 'deposit'
-            AND t.status = 'approved'
+          SELECT SUM(t.usd_value)
+FROM transactions t
+WHERE t.user_id = tl.user_id
+  AND t.tx_type = 'deposit'
+  AND t.status = 'approved'
         ), 0) AS total_deposited,
         COALESCE((
           SELECT SUM(tx.amount)
@@ -91,6 +93,34 @@ export const getAffiliateDashboard = async (req, res) => {
       ORDER BY tl.created_at DESC
     `, [userId]);
 
+
+    // 5️⃣ Team Revenue (Up to 5 Levels)
+const teamRevenueRes = await client.query(`
+  WITH RECURSIVE referral_tree AS (
+      SELECT 
+        u.id AS user_id,
+        1 AS level
+      FROM users u
+      WHERE u.referred_by = (SELECT referral_code FROM users WHERE id = $1)
+
+      UNION ALL
+
+      SELECT 
+        c.id AS user_id,
+        rt.level + 1 AS level
+      FROM users c
+      INNER JOIN referral_tree rt 
+          ON c.referred_by = (SELECT referral_code FROM users WHERE id = rt.user_id)
+      WHERE rt.level < 5
+  )
+  SELECT COALESCE(SUM(t.usd_value), 0) AS team_revenue
+FROM transactions t
+WHERE t.user_id IN (SELECT user_id FROM referral_tree)
+  AND t.tx_type = 'deposit'
+  AND t.status = 'approved'
+`, [userId]);
+
+
     // ✅ Removed extra client.release() here
 
     res.json({
@@ -99,6 +129,7 @@ export const getAffiliateDashboard = async (req, res) => {
         totalReferrals: Number(totalReferralsRes.rows[0]?.total_referrals || 0),
         activeReferrals: Number(activeReferralsRes.rows[0]?.active_referrals || 0),
         totalEarnings: parseFloat(totalEarningsRes.rows[0]?.total_earned || 0).toFixed(2),
+        teamRevenue: Number(teamRevenueRes.rows[0]?.team_revenue || 0),
         referrals: referralListRes.rows.map((r) => ({
           ...r,
           total_deposited: Number(r.total_deposited || 0).toFixed(2),

@@ -202,7 +202,7 @@ useEffect(() => {
 
               <p className="text-2xl font-bold text-white">{stat.value}</p>
 
-              <div className="flex items-center gap-1">
+              {/* <div className="flex items-center gap-1">
                 {stat.isPositive ? (
                   <ArrowUpRight className="w-4 h-4 text-[#80ee64]" />
                 ) : (
@@ -212,7 +212,7 @@ useEffect(() => {
                   {stat.change}
                 </span>
                 <span className="text-xs text-gray-500">vs last week</span>
-              </div>
+              </div> */}
             </motion.div>
           ))}
         </div>
