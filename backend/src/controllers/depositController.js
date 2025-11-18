@@ -51,12 +51,13 @@ export const createDeposit = async (req, res) => {
     const coinSymbol = rows[0].symbol;
 
     // 2) Map to Coingecko
-    const COINGECKO_IDS = {
+     const COINGECKO_IDS = {
       BTC: "bitcoin",
       ETH: "ethereum",
       USDT: "tether",
       USDC: "usd-coin",
       BNB: "binancecoin",
+      SOL: "solana"        
     };
 
     const coingeckoId = COINGECKO_IDS[coinSymbol];
