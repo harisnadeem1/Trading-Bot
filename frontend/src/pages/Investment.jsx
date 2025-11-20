@@ -511,13 +511,16 @@ const Investment = () => {
               </div>
             </div>
 
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="w-full mt-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-medium text-sm transition-all border border-white/10 hover:border-white/20"
-            >
-              Learn More
-            </motion.button>
+            <motion.a
+  href="https://t.me/ImpulseEdge"
+  target="_blank"
+  rel="noopener noreferrer"
+  whileHover={{ scale: 1.02 }}
+  whileTap={{ scale: 0.98 }}
+  className="block w-full mt-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-medium text-sm transition-all border border-white/10 hover:border-white/20 text-center"
+>
+  Learn More
+</motion.a>
           </motion.div>
         </div>
       </div>

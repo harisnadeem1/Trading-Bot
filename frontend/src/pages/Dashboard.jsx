@@ -145,10 +145,14 @@ const Dashboard = () => {
 
   // Calculate balance in selected currency
   const getConvertedBalance = () => {
-    const rate = currencyRates[selectedCurrency].rate;
-    const decimals = currencyRates[selectedCurrency].decimals;
-    return (baseBalanceUSD * rate).toFixed(decimals);
-  };
+  const { rate, decimals } = currencyRates[selectedCurrency];
+  const raw = (baseBalanceUSD * rate);
+
+  return raw.toLocaleString('en-US', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  });
+};
 
   const stats = useMemo(() => {
     if (!dashboardData) return [];

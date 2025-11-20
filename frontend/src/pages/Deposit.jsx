@@ -355,13 +355,17 @@ toast.success("Deposit submitted successfully");
               <p className="text-xs text-gray-400 mb-3">
                 If you have any questions about deposits, please contact our support team.
               </p>
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="w-full py-2.5 rounded-lg bg-white/5 hover:bg-white/10 text-white font-medium text-sm transition-all border border-white/10 hover:border-white/20"
-              >
-                Contact Support
-              </motion.button>
+              <motion.a
+  href="https://t.me/ImpulseEdge"
+  target="_blank"
+  rel="noopener noreferrer"
+  whileHover={{ scale: 1.02 }}
+  whileTap={{ scale: 0.98 }}
+  className="block w-full py-2.5 rounded-lg bg-white/5 hover:bg-white/10 text-white font-medium text-sm transition-all border border-white/10 hover:border-white/20 text-center"
+>
+  Contact Support
+</motion.a>
+
             </div>
           </motion.div>
         </div>
