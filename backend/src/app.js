@@ -15,6 +15,7 @@ import affiliateRoutes from "./routes/affiliateRoutes.js";
 import depositRoutes from "./routes/depositRoutes.js";
 import adminDashboardRoutes from "./routes/adminDashboardRoutes.js";
 import adminUsersRoutes from "./routes/adminUsers.js";
+import adminExcludedUsersRoutes from "./routes/adminExcludedUsers.js";
 dotenv.config();
 
 const app = express();
@@ -63,6 +64,7 @@ app.use("/api/admin/plans", adminPlansRoutes);
 app.use("/api/admin/transactions", adminTransactionRoutes);
 app.use("/api/admin/dashboard", adminDashboardRoutes);
 app.use("/api/admin/users", adminUsersRoutes);
+app.use("/api/admin/excluded-users", adminExcludedUsersRoutes);
 
 
 

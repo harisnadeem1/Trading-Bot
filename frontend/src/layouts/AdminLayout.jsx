@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LayoutDashboard, Users, List, TrendingUp, LogOut, User, Menu } from 'lucide-react';
+import { LayoutDashboard, Users, List, TrendingUp, LogOut, User, Menu, UserMinus } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 
 const adminNavItems = [
@@ -9,6 +9,7 @@ const adminNavItems = [
   { name: 'Users', href: '/admin/users', icon: Users },
   { name: 'Transactions', href: '/admin/transactions', icon: List },
   { name: 'Plans', href: '/admin/plans', icon: TrendingUp },
+  { name: 'Ignored', href: '/admin/excluded-users', icon: UserMinus },
 ];
 
 const AdminLayout = () => {

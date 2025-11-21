@@ -24,6 +24,7 @@ import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminUsers from "@/pages/admin/AdminUsers";
 import AdminTransactions from "@/pages/admin/AdminTransactions";
 import AdminPlans from "@/pages/admin/AdminPlans";
+import AdminExcludedUsers from "@/pages/admin/AdminExcludedUsers";
 
 function App() {
   return (
@@ -93,6 +94,7 @@ function App() {
           <Route path="users" element={<AdminUsers />} />
           <Route path="transactions" element={<AdminTransactions />} />
           <Route path="plans" element={<AdminPlans />} />
+          <Route path="excluded-users" element={<AdminExcludedUsers />} />
         </Route>
 
         {/* Redirect all unknown paths */}
