@@ -11,6 +11,8 @@ const coinLogos = {
   ETH: "/crypto_icons/eth-logo.png",
   USDT: "/crypto_icons/usdt-logo.png",
   USDC: "/crypto_icons/usdc-logo.png",
+  SOL: "/crypto_icons/sol-logo.png",   // ✅ Add this
+  BNB: "/crypto_icons/bnb-logo.png",   // ✅ Add this
 };
 
 const withdrawals = [
@@ -96,21 +98,21 @@ const Withdraw = () => {
   const [withdrawals, setWithdrawals] = useState([]);
 
 
-useEffect(() => {
-  const fetchWithdrawHistory = async () => {
-    try {
-      const res = await axios.get(`${API_BASE}/withdraw/history`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.data.success) {
-        setWithdrawals(res.data.data);
+  useEffect(() => {
+    const fetchWithdrawHistory = async () => {
+      try {
+        const res = await axios.get(`${API_BASE}/withdraw/history`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.data.success) {
+          setWithdrawals(res.data.data);
+        }
+      } catch (err) {
+        console.error("❌ Failed to fetch withdraw history:", err);
       }
-    } catch (err) {
-      console.error("❌ Failed to fetch withdraw history:", err);
-    }
-  };
-  fetchWithdrawHistory();
-}, [token]);
+    };
+    fetchWithdrawHistory();
+  }, [token]);
   useEffect(() => {
     const fetchWithdrawOptions = async () => {
       try {
@@ -131,96 +133,96 @@ useEffect(() => {
   }, [token]);
 
 
- const handleWithdraw = async (e) => {
-  e.preventDefault();
+  const handleWithdraw = async (e) => {
+    e.preventDefault();
 
-  if (!selectedNetwork) {
-    toast.error("Please select a network");
-    return;
-  }
-
-  if (!amount || Number(amount) <= 0) {
-    toast.error("Enter a valid amount");
-    return;
-  }
-
-  if (!address.trim()) {
-    toast.error("Wallet address is required");
-    return;
-  }
-
-  try {
-    const res = await axios.post(
-      `${API_BASE}/withdraw/request`,
-      {
-        currencyNetworkId: selectedNetwork.network_id,
-        amount: parseFloat(amount),
-        walletAddress: address,
-      },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-
-    if (res.data.success) {
-      toast.success("Withdrawal request submitted successfully!");
-
-      setAmount("");
-      setAddress("");
-      setSelectedCurrency(null);
-      setSelectedNetwork(null);
-    } else {
-      toast.error(res.data.message);
+    if (!selectedNetwork) {
+      toast.error("Please select a network");
+      return;
     }
-  } catch (err) {
-    toast.error(err.response?.data?.message || "Something went wrong");
-  }
-};
+
+    if (!amount || Number(amount) <= 0) {
+      toast.error("Enter a valid amount");
+      return;
+    }
+
+    if (!address.trim()) {
+      toast.error("Wallet address is required");
+      return;
+    }
+
+    try {
+      const res = await axios.post(
+        `${API_BASE}/withdraw/request`,
+        {
+          currencyNetworkId: selectedNetwork.network_id,
+          amount: parseFloat(amount),
+          walletAddress: address,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (res.data.success) {
+        toast.success("Withdrawal request submitted successfully!");
+
+        setAmount("");
+        setAddress("");
+        setSelectedCurrency(null);
+        setSelectedNetwork(null);
+      } else {
+        toast.error(res.data.message);
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Something went wrong");
+    }
+  };
 
 
 
 
- const getStatusConfig = (status) => {
-  const normalized = status?.toLowerCase();
+  const getStatusConfig = (status) => {
+    const normalized = status?.toLowerCase();
 
-  switch (normalized) {
-    case 'approved':
-    case 'completed':
-      return {
-        icon: <CheckCircle2 className="w-4 h-4" />,
-        text: 'Completed',
-        bg: 'bg-[#80ee64]/10',
-        textColor: 'text-[#80ee64]',
-        border: 'border-[#80ee64]/30',
-      };
+    switch (normalized) {
+      case 'approved':
+      case 'completed':
+        return {
+          icon: <CheckCircle2 className="w-4 h-4" />,
+          text: 'Completed',
+          bg: 'bg-[#80ee64]/10',
+          textColor: 'text-[#80ee64]',
+          border: 'border-[#80ee64]/30',
+        };
 
-    case 'pending':
-      return {
-        icon: <Clock className="w-4 h-4" />,
-        text: 'Pending',
-        bg: 'bg-yellow-500/10',
-        textColor: 'text-yellow-400',
-        border: 'border-yellow-500/30',
-      };
+      case 'pending':
+        return {
+          icon: <Clock className="w-4 h-4" />,
+          text: 'Pending',
+          bg: 'bg-yellow-500/10',
+          textColor: 'text-yellow-400',
+          border: 'border-yellow-500/30',
+        };
 
-    case 'rejected':
-    case 'failed':
-      return {
-        icon: <XCircle className="w-4 h-4" />,
-        text: 'Rejected',
-        bg: 'bg-red-500/10',
-        textColor: 'text-red-400',
-        border: 'border-red-500/30',
-      };
+      case 'rejected':
+      case 'failed':
+        return {
+          icon: <XCircle className="w-4 h-4" />,
+          text: 'Rejected',
+          bg: 'bg-red-500/10',
+          textColor: 'text-red-400',
+          border: 'border-red-500/30',
+        };
 
-    default:
-      return {
-        icon: <AlertCircle className="w-4 h-4" />,
-        text: 'Unknown',
-        bg: 'bg-gray-500/10',
-        textColor: 'text-gray-400',
-        border: 'border-gray-500/30',
-      };
-  }
-};
+      default:
+        return {
+          icon: <AlertCircle className="w-4 h-4" />,
+          text: 'Unknown',
+          bg: 'bg-gray-500/10',
+          textColor: 'text-gray-400',
+          border: 'border-gray-500/30',
+        };
+    }
+  };
 
   return (
     <>
@@ -253,42 +255,41 @@ useEffect(() => {
             </div>
 
             <form onSubmit={handleWithdraw} className="space-y-6">
-             {/* Currency Selector */}
-<div>
-  <label className="block text-sm text-gray-400 mb-3">Select Currency</label>
-  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-    {currencies.map((c) => (
-      <button
-        key={c.currency_id}
-        type="button"
-        onClick={() => {
-          setSelectedCurrency(c);
-          setSelectedNetwork(null);
-        }}
-        className={`flex items-center gap-3 p-4 rounded-xl border transition-all duration-300 ${
-          selectedCurrency?.currency_id === c.currency_id
-            ? "bg-[#80ee64]/10 border-[#80ee64]/50 shadow-[0_0_20px_rgba(128,238,100,0.2)]"
-            : "bg-[#181A20] border-white/5 hover:border-white/10"
-        }`}
-      >
-        {/* ✅ Pick logo from map or fallback */}
-        <div className="flex-shrink-0 w-7 h-7 rounded-full overflow-hidden">
-          <img
-            src={coinLogos[c.symbol] || "/default-coin.svg"}
-            alt={c.symbol}
-            className="w-full h-full object-contain"
-          />
-        </div>
+              {/* Currency Selector */}
+              <div>
+                <label className="block text-sm text-gray-400 mb-3">Select Currency</label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {currencies.map((c) => (
+                    <button
+                      key={c.currency_id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedCurrency(c);
+                        setSelectedNetwork(null);
+                      }}
+                      className={`flex items-center gap-3 p-4 rounded-xl border transition-all duration-300 ${selectedCurrency?.currency_id === c.currency_id
+                          ? "bg-[#80ee64]/10 border-[#80ee64]/50 shadow-[0_0_20px_rgba(128,238,100,0.2)]"
+                          : "bg-[#181A20] border-white/5 hover:border-white/10"
+                        }`}
+                    >
+                      {/* ✅ Pick logo from map or fallback */}
+                      <div className="flex-shrink-0 w-7 h-7 rounded-full overflow-hidden">
+                        <img
+                          src={coinLogos[c.symbol] || "/default-coin.svg"}
+                          alt={c.symbol}
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
 
-        {/* ✅ Text info */}
-        <div className="text-left min-w-0">
-          <p className="text-sm font-semibold text-white truncate">{c.symbol}</p>
-          <p className="text-xs text-gray-400 truncate">{c.name}</p>
-        </div>
-      </button>
-    ))}
-  </div>
-</div>
+                      {/* ✅ Text info */}
+                      <div className="text-left min-w-0">
+                        <p className="text-sm font-semibold text-white truncate">{c.symbol}</p>
+                        <p className="text-xs text-gray-400 truncate">{c.name}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
 
 
 
@@ -340,47 +341,47 @@ useEffect(() => {
               </div>
 
               {/* Wallet Address Input */}
-            {/* Wallet Address Input */}
-{selectedCurrency && (
-  <div>
-    <div className="flex items-center justify-between mb-2">
-      <label className="text-sm text-gray-400 flex items-center gap-2">
-        {/* ✅ Coin Logo + Label */}
-        <img
-          src={coinLogos[selectedCurrency.symbol] || "/default-coin.svg"}
-          alt={selectedCurrency.symbol}
-          className="w-5 h-5 rounded-full"
-        />
-        <span>
-          Your{" "}
-          <span className="font-semibold text-white">
-            {selectedCurrency.symbol}
-          </span>{" "}
-          Wallet Address
-        </span>
-      </label>
+              {/* Wallet Address Input */}
+              {selectedCurrency && (
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-sm text-gray-400 flex items-center gap-2">
+                      {/* ✅ Coin Logo + Label */}
+                      <img
+                        src={coinLogos[selectedCurrency.symbol] || "/default-coin.svg"}
+                        alt={selectedCurrency.symbol}
+                        className="w-5 h-5 rounded-full"
+                      />
+                      <span>
+                        Your{" "}
+                        <span className="font-semibold text-white">
+                          {selectedCurrency.symbol}
+                        </span>{" "}
+                        Wallet Address
+                      </span>
+                    </label>
 
-      {/* ✅ Dynamic Network Name */}
-      {selectedNetwork && (
-        <span className="text-xs text-gray-500 px-2 py-1 bg-[#181A20] rounded-md">
-          {selectedNetwork.network_name}
-        </span>
-      )}
-    </div>
+                    {/* ✅ Dynamic Network Name */}
+                    {selectedNetwork && (
+                      <span className="text-xs text-gray-500 px-2 py-1 bg-[#181A20] rounded-md">
+                        {selectedNetwork.network_name}
+                      </span>
+                    )}
+                  </div>
 
-    {/* ✅ Input Field */}
-    <div className="relative">
-      <Wallet className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-      <input
-        type="text"
-        value={address}
-        onChange={(e) => setAddress(e.target.value)}
-        placeholder={`Your ${selectedNetwork ? selectedNetwork.network_name : "selected"} wallet address`}
-        className="w-full bg-[#181A20] border border-white/10 rounded-xl pl-12 pr-4 py-3.5 text-white placeholder:text-gray-500 focus:outline-none focus:border-[#80ee64]/50 transition-colors font-mono text-sm"
-      />
-    </div>
-  </div>
-)}
+                  {/* ✅ Input Field */}
+                  <div className="relative">
+                    <Wallet className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                    <input
+                      type="text"
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      placeholder={`Your ${selectedNetwork ? selectedNetwork.network_name : "selected"} wallet address`}
+                      className="w-full bg-[#181A20] border border-white/10 rounded-xl pl-12 pr-4 py-3.5 text-white placeholder:text-gray-500 focus:outline-none focus:border-[#80ee64]/50 transition-colors font-mono text-sm"
+                    />
+                  </div>
+                </div>
+              )}
 
 
 
@@ -459,177 +460,177 @@ useEffect(() => {
                 If you have any questions about withdrawals, contact our support team.
               </p>
               <motion.a
-  href="https://t.me/ImpulseEdge"
-  target="_blank"
-  rel="noopener noreferrer"
-  whileHover={{ scale: 1.02 }}
-  whileTap={{ scale: 0.98 }}
-  className="block w-full py-2.5 rounded-lg bg-white/5 hover:bg-white/10 text-white font-medium text-sm transition-all border border-white/10 hover:border-white/20 text-center"
->
-  Contact Support
-</motion.a>
+                href="https://t.me/ImpulseEdge"
+                target="_blank"
+                rel="noopener noreferrer"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="block w-full py-2.5 rounded-lg bg-white/5 hover:bg-white/10 text-white font-medium text-sm transition-all border border-white/10 hover:border-white/20 text-center"
+              >
+                Contact Support
+              </motion.a>
 
             </div>
           </motion.div>
         </div>
 
         {/* Withdrawal History Section */}
-       <motion.div
-  initial={{ opacity: 0, y: 20 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.5, delay: 0.3 }}
-  className="bg-[#0F1014] border border-white/5 rounded-2xl p-6"
->
-  <div className="flex items-center justify-between mb-6">
-    <div>
-      <h2 className="text-xl font-bold text-white mb-1">Withdrawal History</h2>
-      <p className="text-sm text-gray-400">Track all your withdrawal transactions</p>
-    </div>
-    <button
-      onClick={() => window.location.reload()}
-      className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white font-medium text-sm transition-all border border-white/10 hover:border-white/20"
-    >
-      Refresh
-    </button>
-  </div>
-
-  {/* Desktop Table View */}
-  <div className="hidden lg:block overflow-x-auto">
-    <table className="w-full">
-      <thead>
-        <tr className="border-b border-white/5">
-          <th className="text-left text-xs font-medium text-gray-400 pb-3 px-2">Currency</th>
-          <th className="text-left text-xs font-medium text-gray-400 pb-3 px-2">Amount</th>
-          <th className="text-left text-xs font-medium text-gray-400 pb-3 px-2">Network</th>
-          <th className="text-left text-xs font-medium text-gray-400 pb-3 px-2">Status</th>
-          <th className="text-left text-xs font-medium text-gray-400 pb-3 px-2">Date & Time</th>
-          <th className="text-left text-xs font-medium text-gray-400 pb-3 px-2">Address</th>
-        </tr>
-      </thead>
-      <tbody>
-        {withdrawals.length === 0 ? (
-          <tr>
-            <td colSpan="6" className="text-center text-gray-500 py-6">
-              No withdrawal history found.
-            </td>
-          </tr>
-        ) : (
-          withdrawals.map((w) => {
-            const statusConfig = getStatusConfig(w.status);
-            const dateObj = new Date(w.created_at);
-            const date = dateObj.toLocaleDateString();
-            const time = dateObj.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-
-            return (
-              <tr
-                key={w.id}
-                className="border-b border-white/5 hover:bg-white/5 transition-colors"
-              >
-                <td className="py-4 px-2">
-                  <div className="flex items-center gap-2">
-                    <img
-                      src={coinLogos[w.currency_symbol] || "/default-coin.svg"}
-                      alt={w.currency_symbol}
-                      className="w-5 h-5 rounded-full"
-                    />
-                    <span className="text-sm font-medium text-white">
-                      {w.currency_symbol}
-                    </span>
-                  </div>
-                </td>
-                <td className="py-4 px-2 text-sm text-white font-medium">
-                  ${Number(w.amount).toFixed(2)}
-                </td>
-                <td className="py-4 px-2 text-sm text-gray-400">
-                  {w.network_name || "—"}
-                </td>
-                <td className="py-4 px-2">
-                  <div
-                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ${statusConfig.bg} ${statusConfig.textColor} border ${statusConfig.border}`}
-                  >
-                    {statusConfig.icon}
-                    <span className="text-xs font-medium">{statusConfig.text}</span>
-                  </div>
-                </td>
-                <td className="py-4 px-2">
-                  <div className="text-sm text-gray-400">
-                    <div>{date}</div>
-                    <div className="text-xs text-gray-500">{time}</div>
-                  </div>
-                </td>
-                <td className="py-4 px-2 text-xs text-gray-500 font-mono">
-                  {w.wallet_address || "—"}
-                </td>
-              </tr>
-            );
-          })
-        )}
-      </tbody>
-    </table>
-  </div>
-
-  {/* Mobile Card View */}
-  <div className="lg:hidden space-y-3">
-    {withdrawals.length === 0 ? (
-      <p className="text-center text-gray-500 py-6">No withdrawal history found.</p>
-    ) : (
-      withdrawals.map((w) => {
-        const statusConfig = getStatusConfig(w.status);
-        const dateObj = new Date(w.created_at);
-        const date = dateObj.toLocaleDateString();
-        const time = dateObj.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-
-        return (
-          <div
-            key={w.id}
-            className="bg-[#181A20] border border-white/5 rounded-xl p-4"
-          >
-            <div className="flex items-start justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <img
-                  src={coinLogos[w.currency_symbol] || "/default-coin.svg"}
-                  alt={w.currency_symbol}
-                  className="w-5 h-5 rounded-full"
-                />
-                <div>
-                  <p className="text-sm font-semibold text-white">
-                    {w.currency_symbol}
-                  </p>
-                  <p className="text-xs text-gray-400">${Number(w.amount).toFixed(2)}</p>
-                </div>
-              </div>
-              <div
-                className={`flex items-center gap-1 px-2 py-1 rounded-full ${statusConfig.bg} ${statusConfig.textColor} border ${statusConfig.border}`}
-              >
-                {statusConfig.icon}
-                <span className="text-xs font-medium">{statusConfig.text}</span>
-              </div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="bg-[#0F1014] border border-white/5 rounded-2xl p-6"
+        >
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-xl font-bold text-white mb-1">Withdrawal History</h2>
+              <p className="text-sm text-gray-400">Track all your withdrawal transactions</p>
             </div>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-xs text-gray-400">Network</span>
-                <span className="text-xs text-gray-300">
-                  {w.network_name || "—"}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-xs text-gray-400">Date</span>
-                <span className="text-xs text-gray-300">
-                  {date} {time}
-                </span>
-              </div>
-              <div className="pt-2 border-t border-white/5">
-                <span className="text-xs text-gray-500 font-mono">
-                  {w.wallet_address || "—"}
-                </span>
-              </div>
-            </div>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white font-medium text-sm transition-all border border-white/10 hover:border-white/20"
+            >
+              Refresh
+            </button>
           </div>
-        );
-      })
-    )}
-  </div>
-</motion.div>
+
+          {/* Desktop Table View */}
+          <div className="hidden lg:block overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-white/5">
+                  <th className="text-left text-xs font-medium text-gray-400 pb-3 px-2">Currency</th>
+                  <th className="text-left text-xs font-medium text-gray-400 pb-3 px-2">Amount</th>
+                  <th className="text-left text-xs font-medium text-gray-400 pb-3 px-2">Network</th>
+                  <th className="text-left text-xs font-medium text-gray-400 pb-3 px-2">Status</th>
+                  <th className="text-left text-xs font-medium text-gray-400 pb-3 px-2">Date & Time</th>
+                  <th className="text-left text-xs font-medium text-gray-400 pb-3 px-2">Address</th>
+                </tr>
+              </thead>
+              <tbody>
+                {withdrawals.length === 0 ? (
+                  <tr>
+                    <td colSpan="6" className="text-center text-gray-500 py-6">
+                      No withdrawal history found.
+                    </td>
+                  </tr>
+                ) : (
+                  withdrawals.map((w) => {
+                    const statusConfig = getStatusConfig(w.status);
+                    const dateObj = new Date(w.created_at);
+                    const date = dateObj.toLocaleDateString();
+                    const time = dateObj.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+                    return (
+                      <tr
+                        key={w.id}
+                        className="border-b border-white/5 hover:bg-white/5 transition-colors"
+                      >
+                        <td className="py-4 px-2">
+                          <div className="flex items-center gap-2">
+                            <img
+                              src={coinLogos[w.currency_symbol] || "/default-coin.svg"}
+                              alt={w.currency_symbol}
+                              className="w-5 h-5 rounded-full"
+                            />
+                            <span className="text-sm font-medium text-white">
+                              {w.currency_symbol}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="py-4 px-2 text-sm text-white font-medium">
+                          ${Number(w.amount).toFixed(2)}
+                        </td>
+                        <td className="py-4 px-2 text-sm text-gray-400">
+                          {w.network_name || "—"}
+                        </td>
+                        <td className="py-4 px-2">
+                          <div
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ${statusConfig.bg} ${statusConfig.textColor} border ${statusConfig.border}`}
+                          >
+                            {statusConfig.icon}
+                            <span className="text-xs font-medium">{statusConfig.text}</span>
+                          </div>
+                        </td>
+                        <td className="py-4 px-2">
+                          <div className="text-sm text-gray-400">
+                            <div>{date}</div>
+                            <div className="text-xs text-gray-500">{time}</div>
+                          </div>
+                        </td>
+                        <td className="py-4 px-2 text-xs text-gray-500 font-mono">
+                          {w.wallet_address || "—"}
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile Card View */}
+          <div className="lg:hidden space-y-3">
+            {withdrawals.length === 0 ? (
+              <p className="text-center text-gray-500 py-6">No withdrawal history found.</p>
+            ) : (
+              withdrawals.map((w) => {
+                const statusConfig = getStatusConfig(w.status);
+                const dateObj = new Date(w.created_at);
+                const date = dateObj.toLocaleDateString();
+                const time = dateObj.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+                return (
+                  <div
+                    key={w.id}
+                    className="bg-[#181A20] border border-white/5 rounded-xl p-4"
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <img
+                          src={coinLogos[w.currency_symbol] || "/default-coin.svg"}
+                          alt={w.currency_symbol}
+                          className="w-5 h-5 rounded-full"
+                        />
+                        <div>
+                          <p className="text-sm font-semibold text-white">
+                            {w.currency_symbol}
+                          </p>
+                          <p className="text-xs text-gray-400">${Number(w.amount).toFixed(2)}</p>
+                        </div>
+                      </div>
+                      <div
+                        className={`flex items-center gap-1 px-2 py-1 rounded-full ${statusConfig.bg} ${statusConfig.textColor} border ${statusConfig.border}`}
+                      >
+                        {statusConfig.icon}
+                        <span className="text-xs font-medium">{statusConfig.text}</span>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-xs text-gray-400">Network</span>
+                        <span className="text-xs text-gray-300">
+                          {w.network_name || "—"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-xs text-gray-400">Date</span>
+                        <span className="text-xs text-gray-300">
+                          {date} {time}
+                        </span>
+                      </div>
+                      <div className="pt-2 border-t border-white/5">
+                        <span className="text-xs text-gray-500 font-mono">
+                          {w.wallet_address || "—"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </motion.div>
 
       </div>
     </>
