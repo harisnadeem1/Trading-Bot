@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LayoutDashboard, TrendingUp, ArrowDownToLine, ArrowUpFromLine, Users, Home, LogOut, User, Menu, X } from 'lucide-react';
@@ -26,6 +26,23 @@ const DashboardLayout = () => {
   const logout = useAuthStore((state) => state.logout);
   const currentUser = useAuthStore((state) => state.currentUser);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const fetchCurrentUser = useAuthStore((state) => state.fetchCurrentUser);
+
+  useEffect(() => {
+  const verifyUser = async () => {
+    await fetchCurrentUser();
+
+    const updatedUser = useAuthStore.getState().currentUser;
+
+    // If user is null → locked OR token expired → logout and redirect
+    if (!updatedUser) {
+      logout();
+      navigate("/");
+    }
+  };
+
+  verifyUser();
+}, []);
 
   const handleLogout = () => {
     logout();

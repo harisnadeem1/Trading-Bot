@@ -1,10 +1,7 @@
 // src/api/auth.js
 import axios from "axios";
 
-// Always read from env (works in dev & production)
 const API_URL = import.meta.env.VITE_API_BASE_URL;
-
-// USERS endpoint
 const USERS_URL = `${API_URL}/users`;
 
 export const loginUser = async (email, password) => {
@@ -12,9 +9,20 @@ export const loginUser = async (email, password) => {
     const res = await axios.post(`${USERS_URL}/login`, { email, password });
     return { success: true, data: res.data };
   } catch (err) {
+    const errData = err.response?.data;
+
+    // 🔥 Detect admin/60-day lock
+    if (err.response?.status === 403 && errData?.error === "ACCOUNT_LOCKED") {
+      return {
+        success: false,
+        locked: true,                     // 👈 important
+        message: errData.message || "Your access has been locked.",
+      };
+    }
+
     return {
       success: false,
-      message: err.response?.data?.message || "Login failed",
+      message: errData?.message || "Login failed",
     };
   }
 };
@@ -29,9 +37,10 @@ export const signupUser = async (full_name, email, password, referralCode = null
     });
     return { success: true, data: res.data };
   } catch (err) {
+    const errData = err.response?.data;
     return {
       success: false,
-      message: err.response?.data?.message || "Signup failed",
+      message: errData?.message || "Signup failed",
     };
   }
 };

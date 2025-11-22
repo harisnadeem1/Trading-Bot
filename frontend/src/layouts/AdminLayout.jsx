@@ -9,7 +9,6 @@ const adminNavItems = [
   { name: 'Users', href: '/admin/users', icon: Users },
   { name: 'Transactions', href: '/admin/transactions', icon: List },
   { name: 'Plans', href: '/admin/plans', icon: TrendingUp },
-  { name: 'Ignored', href: '/admin/excluded-users', icon: UserMinus },
 ];
 
 const AdminLayout = () => {

@@ -24,7 +24,9 @@ export const dbGetAllUsers = async ({ search, role, limit, offset }) => {
       created_at AS joinDate,
       total_deposits AS "totalDeposited",
       total_withdrawals AS "totalWithdrawn",
-      role
+      role,
+      is_locked,
+      was_ever_locked
     FROM users
     ${whereClause}
     ORDER BY created_at DESC

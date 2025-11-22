@@ -23,18 +23,21 @@ const AuthModal = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleLogin = async (e) => {
-    e.preventDefault();
-    const result = await login(loginEmail, loginPassword);
+  e.preventDefault();
+  const result = await login(loginEmail, loginPassword);
 
-    if (result.success) {
-      const { user } = result;
-      toast.success(`Welcome back, ${user.full_name}!`);
-      closeAuthModal();
-      navigate(user.role === "admin" ? "/admin" : "/dashboard");
-    } else {
-      toast.error(result.message);
+  if (result.success) {
+    const { user } = result;
+    toast.success(`Welcome back, ${user.full_name}!`);
+    closeAuthModal();
+    navigate(user.role === "admin" ? "/admin" : "/dashboard");
+  } else {
+    // ❌ Don't show toast if it's a lock case (modal handles it)
+    if (!result.locked) {
+      toast.error(result.message || "Login failed");
     }
-  };
+  }
+};
 
   const handleSignup = async (e) => {
     e.preventDefault();

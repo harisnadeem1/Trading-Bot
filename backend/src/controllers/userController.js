@@ -2,6 +2,7 @@
 import bcrypt from "bcryptjs";
 import pool from "../config/db.js";
 import generateToken from "../utils/generateToken.js";
+import { checkUserLockStatus } from "../utils/checkUserLockStatus.js";
 
 // ✅ REGISTER USER
 export const registerUser = async (req, res) => {
@@ -39,29 +40,69 @@ export const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
-    if (user.rows.length === 0) {
+    const userRes = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+    if (userRes.rows.length === 0) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
+    const user = userRes.rows[0];
+
     const normalizedPassword = password.toLowerCase();
-const validPass = await bcrypt.compare(normalizedPassword, user.rows[0].password_hash);
+    const validPass = await bcrypt.compare(normalizedPassword, user.password_hash);
     if (!validPass) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    const token = generateToken(user.rows[0].id);
-    console.log(user.rows[0].role);
+    // 🔥 Apply 60-day lock logic here
+    const lockStatus = await checkUserLockStatus(user.id);
+    if (lockStatus.locked) {
+      return res.status(403).json({
+        error: "ACCOUNT_LOCKED",
+        message: "Your 60-day access has expired. Contact support."
+      });
+    }
+
+    const token = generateToken(user.id);
 
     res.json({
-      id: user.rows[0].id,
-      full_name: user.rows[0].full_name,
-      email: user.rows[0].email,
-      role: user.rows[0].role, // ✅ include role
+      id: user.id,
+      full_name: user.full_name,
+      email: user.email,
+      role: user.role,
       token,
     });
+
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+
+export const getMe = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // 🔥 Apply lock logic
+    const lockStatus = await checkUserLockStatus(userId);
+    if (lockStatus.locked) {
+      return res.status(403).json({
+        error: "ACCOUNT_LOCKED",
+        message: "Your 60-day access has expired. Contact support."
+      });
+    }
+
+    // Get full user data
+    const result = await pool.query(`
+      SELECT id, full_name, email, role, balance, total_deposits, total_withdrawals
+      FROM users
+      WHERE id = $1
+    `, [userId]);
+
+    res.json(result.rows[0]);
     
   } catch (err) {
     res.status(500).json({ message: "Server error" });
   }
 };
+
