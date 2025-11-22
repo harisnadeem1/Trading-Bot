@@ -5,6 +5,7 @@ import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
 import { DollarSign, Wallet, Clock, CheckCircle2, XCircle, ArrowUpRight, AlertCircle, TrendingDown, Shield } from 'lucide-react';
 import { Ethereum, Tether, Usdc, Bitcoin } from '@/components/CoinIcons';
+import toast from "react-hot-toast";
 const coinLogos = {
   BTC: "/crypto_icons/btc-logo.png",
   ETH: "/crypto_icons/eth-logo.png",
@@ -130,35 +131,50 @@ useEffect(() => {
   }, [token]);
 
 
-  const handleWithdraw = async (e) => {
-    e.preventDefault();
-    if (!selectedNetwork) {
-      alert("Please select a network");
-      return;
+ const handleWithdraw = async (e) => {
+  e.preventDefault();
+
+  if (!selectedNetwork) {
+    toast.error("Please select a network");
+    return;
+  }
+
+  if (!amount || Number(amount) <= 0) {
+    toast.error("Enter a valid amount");
+    return;
+  }
+
+  if (!address.trim()) {
+    toast.error("Wallet address is required");
+    return;
+  }
+
+  try {
+    const res = await axios.post(
+      `${API_BASE}/withdraw/request`,
+      {
+        currencyNetworkId: selectedNetwork.network_id,
+        amount: parseFloat(amount),
+        walletAddress: address,
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    if (res.data.success) {
+      toast.success("Withdrawal request submitted successfully!");
+
+      setAmount("");
+      setAddress("");
+      setSelectedCurrency(null);
+      setSelectedNetwork(null);
+    } else {
+      toast.error(res.data.message);
     }
-    try {
-      const res = await axios.post(
-        `${API_BASE}/withdraw/request`,
-        {
-          currencyNetworkId: selectedNetwork.network_id,
-          amount: parseFloat(amount),
-          walletAddress: address,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      if (res.data.success) {
-        alert("✅ Withdrawal request submitted successfully!");
-        setAmount("");
-        setAddress("");
-        setSelectedCurrency(null);
-        setSelectedNetwork(null);
-      } else {
-        alert("⚠️ " + res.data.message);
-      }
-    } catch (err) {
-      alert("❌ " + (err.response?.data?.message || "Something went wrong"));
-    }
-  };
+  } catch (err) {
+    toast.error(err.response?.data?.message || "Something went wrong");
+  }
+};
+
 
 
 
